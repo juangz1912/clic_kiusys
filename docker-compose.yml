@@ -1,0 +1,48 @@
+services:
+  db-pruebas:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pss
+      POSTGRES_PASSWORD: pss
+      POSTGRES_DB: pss_pruebas
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_pruebas:/var/lib/postgresql/data
+
+  api-pruebas:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      ENVIRONMENT: pruebas
+      DATABASE_URL: postgresql://pss:pss@db-pruebas:5432/pss_pruebas
+      HOLD_MINUTES: 10
+    depends_on:
+      - db-pruebas
+
+  db-produccion:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pss
+      POSTGRES_PASSWORD: pss_prod
+      POSTGRES_DB: pss_produccion
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_produccion:/var/lib/postgresql/data
+
+  api-produccion:
+    build: .
+    ports:
+      - "8002:8000"
+    environment:
+      ENVIRONMENT: produccion
+      DATABASE_URL: postgresql://pss:pss_prod@db-produccion:5432/pss_produccion
+      HOLD_MINUTES: 10
+    depends_on:
+      - db-produccion
+
+volumes:
+  pg_pruebas:
+  pg_produccion:
