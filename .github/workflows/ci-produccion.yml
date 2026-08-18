@@ -1,0 +1,56 @@
+name: CI Produccion
+
+on:
+  push:
+    branches: [main, master, produccion]
+  pull_request:
+    branches: [main, master, produccion]
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: produccion
+      DATABASE_URL: postgresql://pss:pss@localhost:5432/pss_produccion
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: pss
+          POSTGRES_PASSWORD: pss
+          POSTGRES_DB: pss_produccion
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pss -d pss_produccion"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests with coverage gate (>= 85%)
+        run: |
+          pytest --cov=app --cov-report=term-missing --cov-fail-under=85
+
+      - name: Build Docker image
+        run: docker build -t clic-kiusys:produccion .
+
+      - name: Deploy produccion stack
+        run: docker compose up -d db-produccion api-produccion
+
+      - name: Smoke test produccion API
+        run: |
+          sleep 5
+          curl -f http://localhost:8002/api/health

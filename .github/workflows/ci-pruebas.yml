@@ -1,0 +1,56 @@
+name: CI Pruebas
+
+on:
+  push:
+    branches: [develop, pruebas]
+  pull_request:
+    branches: [develop, pruebas]
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: pruebas
+      DATABASE_URL: postgresql://pss:pss@localhost:5432/pss_pruebas
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: pss
+          POSTGRES_PASSWORD: pss
+          POSTGRES_DB: pss_pruebas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pss -d pss_pruebas"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests with coverage gate (>= 60%)
+        run: |
+          pytest --cov=app --cov-report=term-missing --cov-fail-under=60
+
+      - name: Build Docker image
+        run: docker build -t clic-kiusys:pruebas .
+
+      - name: Deploy pruebas stack
+        run: docker compose up -d db-pruebas api-pruebas
+
+      - name: Smoke test pruebas API
+        run: |
+          sleep 5
+          curl -f http://localhost:8001/api/health
