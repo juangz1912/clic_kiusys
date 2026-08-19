@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [develop, pruebas]
 
+env:
+  RENDER_URL_PRUEBAS: https://clic-kiusys-pruebas.onrender.com
+
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
@@ -47,10 +50,40 @@ jobs:
       - name: Build Docker image
         run: docker build -t clic-kiusys:pruebas .
 
-      - name: Deploy pruebas stack
+      - name: Deploy pruebas stack (local smoke)
         run: docker compose up -d db-pruebas api-pruebas
 
-      - name: Smoke test pruebas API
+      - name: Smoke test local pruebas API
         run: |
-          sleep 5
-          curl -f http://localhost:8001/api/health
+          for i in $(seq 1 12); do
+            curl -sf http://localhost:8001/api/health && exit 0
+            sleep 5
+          done
+          exit 1
+
+      - name: Deploy to Render (pruebas)
+        id: render_deploy
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_PRUEBAS }}
+        run: |
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+            echo "RENDER_DEPLOY_HOOK_PRUEBAS no configurado; omitiendo deploy cloud"
+            exit 0
+          fi
+          curl -f -X POST "$DEPLOY_HOOK"
+          echo "skipped=false" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Render deploy
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && steps.render_deploy.outputs.skipped != 'true'
+        run: sleep 120
+
+      - name: Smoke test cloud pruebas API
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && steps.render_deploy.outputs.skipped != 'true'
+        run: |
+          for i in $(seq 1 12); do
+            curl -sf "${{ env.RENDER_URL_PRUEBAS }}/api/health" && exit 0
+            sleep 10
+          done
+          exit 1
