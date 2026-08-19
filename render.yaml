@@ -1,14 +1,9 @@
 # Blueprint Render — 2 ambientes independientes (pruebas / producción)
-# Aplicar desde: Render Dashboard → Blueprints → New Blueprint → repo clic_kiusys
+# Nota free tier: 1 instancia PostgreSQL con 2 bases (pss_pruebas / pss_produccion)
 
 databases:
   - name: pss-pruebas
     databaseName: pss_pruebas
-    user: pss
-    plan: free
-
-  - name: pss-produccion
-    databaseName: pss_produccion
     user: pss
     plan: free
 
@@ -42,7 +37,4 @@ services:
         value: produccion
       - key: HOLD_MINUTES
         value: "10"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: pss-produccion
-          property: connectionString
+      # DATABASE_URL: configurar en Render apuntando a pss_produccion (misma instancia PG)
