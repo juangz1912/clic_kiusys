@@ -23,10 +23,15 @@ Estados de asiento: `seleccionado`, `asignado`, `expirado`.
 
 ## Ambientes
 
-| Ambiente | API local | Base de datos |
-|----------|-----------|---------------|
-| Pruebas | http://localhost:8001 | postgres puerto 5433 |
-| Producción | http://localhost:8002 | postgres puerto 5434 |
+| Ambiente | URL cloud | API local | Base de datos |
+|----------|-----------|-----------|---------------|
+| Pruebas | https://clic-kiusys-pruebas.onrender.com | http://localhost:8001 | postgres puerto 5433 |
+| Producción | https://clic-kiusys-prod.onrender.com | http://localhost:8002 | postgres puerto 5434 |
+
+Documentación interactiva:
+
+- Pruebas: https://clic-kiusys-pruebas.onrender.com/docs
+- Producción: https://clic-kiusys-prod.onrender.com/docs
 
 ## Ejecución local
 
@@ -38,16 +43,44 @@ pytest --cov=app --cov-report=term-missing
 docker compose up -d
 ```
 
+Sembrar datos demo:
+
+```bash
+./scripts/seed_demo.sh
+BASE_URL=https://clic-kiusys-pruebas.onrender.com ./scripts/seed_demo.sh
+```
+
+## Despliegue en Render
+
+El archivo `render.yaml` define 2 PostgreSQL + 2 Web Services (pruebas/producción).
+
+1. Render Dashboard → **Blueprints** → **New Blueprint Instance**
+2. Conectar repo `juangz1912/clic_kiusys`
+3. Aplicar blueprint (crea BD y servicios automáticamente)
+4. En cada Web Service → **Settings** → **Deploy Hook** → copiar URL
+5. GitHub → Settings → Secrets → Actions:
+   - `RENDER_DEPLOY_HOOK_PRUEBAS`
+   - `RENDER_DEPLOY_HOOK_PRODUCCION`
+
 ## Pipelines
 
-- `.github/workflows/ci-pruebas.yml` → rama `develop`, cobertura mínima **60%**
-- `.github/workflows/ci-produccion.yml` → rama `main`, cobertura mínima **85%**
+- `.github/workflows/ci-pruebas.yml` → rama `develop`, cobertura mínima **60%**, deploy a Render pruebas
+- `.github/workflows/ci-produccion.yml` → rama `main`, cobertura mínima **85%**, deploy a Render producción
+
+Flujo: tests → build Docker → smoke local → Deploy Hook Render → smoke test URL pública.
 
 Si falla un test o la cobertura, el pipeline se detiene y no despliega.
+
+GitHub Actions: https://github.com/juangz1912/clic_kiusys/actions
 
 ## Stack
 
 - Python 3.12 + FastAPI
 - PostgreSQL
 - Docker / Docker Compose
+- Render (cloud)
 - GitHub Actions
+
+## Sustentación
+
+Ver `SUSTENTACION.md` para guion de demo del 19 de agosto.
