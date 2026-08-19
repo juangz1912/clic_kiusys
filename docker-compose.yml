@@ -9,6 +9,11 @@ services:
       - "5433:5432"
     volumes:
       - pg_pruebas:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pss -d pss_pruebas"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api-pruebas:
     build: .
@@ -19,7 +24,14 @@ services:
       DATABASE_URL: postgresql://pss:pss@db-pruebas:5432/pss_pruebas
       HOLD_MINUTES: 10
     depends_on:
-      - db-pruebas
+      db-pruebas:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   db-produccion:
     image: postgres:16-alpine
@@ -31,6 +43,11 @@ services:
       - "5434:5432"
     volumes:
       - pg_produccion:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pss -d pss_produccion"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api-produccion:
     build: .
@@ -41,7 +58,14 @@ services:
       DATABASE_URL: postgresql://pss:pss_prod@db-produccion:5432/pss_produccion
       HOLD_MINUTES: 10
     depends_on:
-      - db-produccion
+      db-produccion:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 volumes:
   pg_pruebas:
