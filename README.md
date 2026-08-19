@@ -52,7 +52,7 @@ BASE_URL=https://clic-kiusys-pruebas.onrender.com ./scripts/seed_demo.sh
 
 ## Despliegue en Render
 
-El archivo `render.yaml` define 2 PostgreSQL + 2 Web Services (pruebas/producción).
+El archivo `render.yaml` define 2 Web Services (pruebas/producción) y **1 instancia PostgreSQL** con 2 bases de datos separadas (`pss_pruebas`, `pss_produccion`) en el plan free tier.
 
 1. Render Dashboard → **Blueprints** → **New Blueprint Instance**
 2. Conectar repo `juangz1912/clic_kiusys`
@@ -61,13 +61,14 @@ El archivo `render.yaml` define 2 PostgreSQL + 2 Web Services (pruebas/producci�
 5. GitHub → Settings → Secrets → Actions:
    - `RENDER_DEPLOY_HOOK_PRUEBAS`
    - `RENDER_DEPLOY_HOOK_PRODUCCION`
+   - `RENDER_API_KEY` (fallback si no hay Deploy Hook; usado por el pipeline para disparar deploy)
 
 ## Pipelines
 
 - `.github/workflows/ci-pruebas.yml` → rama `develop`, cobertura mínima **60%**, deploy a Render pruebas
 - `.github/workflows/ci-produccion.yml` → rama `main`, cobertura mínima **85%**, deploy a Render producción
 
-Flujo: tests → build Docker → smoke local → Deploy Hook Render → smoke test URL pública.
+Flujo: tests → build Docker → smoke local → deploy Render → smoke cloud con `scripts/test_all_endpoints.py` (25 endpoints).
 
 Si falla un test o la cobertura, el pipeline se detiene y no despliega.
 

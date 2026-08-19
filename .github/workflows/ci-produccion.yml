@@ -88,8 +88,16 @@ jobs:
       - name: Smoke test cloud produccion API
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.render_deploy.outputs.skipped != 'true'
         run: |
+          ready=false
           for i in $(seq 1 12); do
-            curl -sf "${{ env.RENDER_URL_PRODUCCION }}/api/health" && exit 0
+            if curl -sf "${{ env.RENDER_URL_PRODUCCION }}/api/health"; then
+              ready=true
+              break
+            fi
             sleep 10
           done
-          exit 1
+          if [ "$ready" != "true" ]; then
+            echo "Render produccion no respondió a /api/health"
+            exit 1
+          fi
+          python scripts/test_all_endpoints.py "${{ env.RENDER_URL_PRODUCCION }}"
