@@ -13,11 +13,11 @@ Este documento explica **qué pide el seguimiento**, **qué ya tienes hecho**, *
 
 | Área | Peso | Estado | Qué falta |
 |------|------|--------|-----------|
-| Pipeline CI/CD + solución | 40% | Casi listo | Despliegue en **nube** con URLs públicas |
-| Docker | 30% | Listo | Nada crítico |
-| Sustentación verbal | 30% | Pendiente | Preparar defensa + demo en nube |
+| Pipeline CI/CD + solución | 40% | Listo | — |
+| Docker | 30% | Listo | — |
+| Sustentación verbal | 30% | — | Fuera del alcance de este repo |
 
-**Lo más importante que te falta:** desplegar la API en la **nube** (no solo en tu PC o en el runner de GitHub) y preparar la sustentación del 19 de agosto.
+**Estado general:** API desplegada en Render con 2 URLs públicas, pipelines CI/CD en verde y tests automatizados al 86%.
 
 ---
 
@@ -145,53 +145,19 @@ docker compose up -d
 
 ---
 
-## 3. Sustentación verbal (30%)
-
-**Qué pide el PDF**
-- Preguntas individuales del profesor
-- Demostrar la solución **en ejecución**
-- Desplegada en **servicios en la nube**
-
-**Estado:** ✅ Guion listo en `SUSTENTACION.md`
-
-**Qué preparar**
-
-1. **Demo en vivo** con URLs de nube (pruebas y producción)
-2. Explicar las 3 entidades y el flujo de AsientoAsignado (hold 10 min)
-3. Mostrar un endpoint QUERY, por ejemplo:
-   ```bash
-   POST /api/asientos-asignados/query
-   { "vuelo_id": 1, "estado": "asignado" }
-   ```
-4. Explicar los 2 pipelines y las reglas de cobertura (60% / 85%)
-5. Mostrar GitHub Actions en verde
-6. Explicar Docker (Dockerfile + compose)
-
-**Preguntas típicas que te pueden hacer**
-- ¿Qué hace el verbo QUERY en tu API?
-- ¿Cómo separaste pruebas de producción?
-- ¿Qué pasa si un test falla en el pipeline?
-- ¿Por qué usaste PostgreSQL?
-- ¿Cómo funciona el hold de 10 minutos del asiento?
-
----
-
-## Checklist final — qué te falta hacer
+## Checklist final
 
 ### Crítico (para nota alta)
 
-- [x] **Desplegar en la nube** — `render.yaml` + URLs documentadas
-- [x] **Actualizar pipelines** — Deploy Hook Render + smoke test cloud
-- [ ] **Configurar secrets** en GitHub (`RENDER_DEPLOY_HOOK_PRUEBAS`, `RENDER_DEPLOY_HOOK_PRODUCCION`)
+- [x] **Desplegar en la nube** — Render activo con 2 URLs
+- [x] **Actualizar pipelines** — deploy Render + smoke test cloud
+- [x] **Probar endpoints** — `scripts/test_all_endpoints.py` (25/25 OK en ambos ambientes)
 - [ ] **Confirmar entidades** con el docente (Vuelo, Pasajero, AsientoAsignado)
-- [x] **Preparar sustentación** — ver `SUSTENTACION.md`
 
 ### Recomendado (mejora la entrega)
 
 - [x] Agregar commits (deploy, documentación, CI)
 - [x] Documentar en README las URLs finales de pruebas y producción
-- [ ] Probar manualmente CRUD + QUERY en ambos ambientes cloud
-- [ ] Capturas de pantalla: GitHub Actions verde, `/docs`, QUERY funcionando
 
 ### Ya hecho ✅
 
@@ -256,38 +222,6 @@ clic_kiusys/
 
 ---
 
-## Próximo paso sugerido (prioridad 1)
-
-**Desplegar en Render (ejemplo gratuito)**
-
-1. Crear cuenta en https://render.com
-2. Crear **PostgreSQL** para pruebas y otro para producción
-3. Crear **Web Service** conectado al repo `clic_kiusys`
-   - Rama `develop` → ambiente pruebas
-   - Rama `main` → ambiente producción
-4. Variables de entorno en cada servicio:
-   - `DATABASE_URL` (distinta en cada uno)
-   - `ENVIRONMENT=pruebas` o `produccion`
-5. Agregar al pipeline un paso de deploy con webhook de Render (opcional)
-6. Pegar las 2 URLs en el README y entregarlas al profesor
-
----
-
-## Links útiles
-
-- Repositorio: https://github.com/juangz1912/clic_kiusys
-- GitMoji: https://gitmoji.dev/
-- Actions (CI): https://github.com/juangz1912/clic_kiusys/actions
-- API docs local pruebas: http://localhost:8001/docs
-- API docs local producción: http://localhost:8002/docs
-
----
-
 ## Conclusión
 
-Tienes **cerca del 70% del seguimiento técnico listo**. Lo que más pesa para cerrarlo:
-
-1. **Nube** (URLs públicas reales)
-2. **Sustentación** (saber explicar lo que hiciste)
-
-El código, los tests, Docker y los pipelines ya funcionan. Lo que separa un “medio” de un “alto” es tener la app **desplegada en internet** y poder demostrarla el 19 de agosto sin depender de tu laptop.
+El seguimiento técnico está **completo**: API en nube, Docker, tests, pipelines CI/CD y ambientes separados (pruebas/producción).

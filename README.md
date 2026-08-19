@@ -81,6 +81,3 @@ GitHub Actions: https://github.com/juangz1912/clic_kiusys/actions
 - Render (cloud)
 - GitHub Actions
 
-## Sustentación
-
-Ver `SUSTENTACION.md` para guion de demo del 19 de agosto.
