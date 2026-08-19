@@ -10,7 +10,7 @@ def _create_vuelo(client):
             "numero_vuelo": "AV100",
             "origen": "BOG",
             "destino": "MDE",
-            "fecha": date.today().isoformat(),
+            "fecha": "fecha": "2026-08-199",
             "aeronave": "A320",
             "capacidad": 180,
         },
