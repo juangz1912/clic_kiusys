@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: clic-kiusys-api
+  namespace: clic-kiusys
+spec:
+  selector:
+    app: clic-kiusys-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+  type: ClusterIP
