@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clic-kiusys-api
+  namespace: clic-kiusys
+  labels:
+    app: clic-kiusys-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: clic-kiusys-api
+  template:
+    metadata:
+      labels:
+        app: clic-kiusys-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/juangz1912/clic-kiusys:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: clic-kiusys-api-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: clic-kiusys-api-secret
+                  key: DATABASE_URL
+            - name: API_B_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: clic-kiusys-api-secret
+                  key: API_B_BASE_URL
+            - name: API_C_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: clic-kiusys-api-secret
+                  key: API_C_BASE_URL
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /api/v2/health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/v2/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
