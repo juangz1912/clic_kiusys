@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clic-kiusys-api-config
+  namespace: clic-kiusys
+data:
+  ENVIRONMENT: "produccion"
+  CLOUD_PROVIDER: "oci"
+  OKE_CLUSTER_NAME: "clic-kiusys-oke"
+  API_B_ENTITY_PATH: "/api/mascotas"
+  API_C_ENTITY_PATH: "/api/items"
+  INTEGRATION_STUB_WHEN_UNREACHABLE: "true"
