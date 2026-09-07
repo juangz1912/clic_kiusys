@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: clic-kiusys
+  labels:
+    app.kubernetes.io/name: clic-kiusys
+    app.kubernetes.io/part-of: seguimiento-2
