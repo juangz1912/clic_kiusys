@@ -22,6 +22,15 @@ class Settings(BaseSettings):
 
     observability_saas_url: str = ""
 
+    object_storage_backend: str = "local"
+    object_storage_local_dir: str = "./data/object-storage"
+    oci_os_namespace: str = ""
+    oci_os_bucket: str = "clic-kiusys-flow"
+    oci_os_region: str = ""
+    oci_s3_access_key_id: str = ""
+    oci_s3_secret_access_key: str = ""
+    public_api_base_url: str = ""
+
     @field_validator("database_url", mode="before")
     @classmethod
     def normalize_database_url(cls, value: str) -> str:

@@ -9,6 +9,7 @@ from app.clients.api_c import fetch_companion_entity_c
 from app.models.entities import Vuelo
 from app.schemas import VueloRead
 from app.schemas_v2 import CompanionPayload, FlujoV2Request, FlujoV2Response
+from app.services.object_storage_service import store_flujo_snapshot
 
 
 def _resolve_local_vuelo(db: Session, payload: FlujoV2Request) -> VueloRead:
@@ -54,4 +55,13 @@ def build_flujo_v2(db: Session, payload: FlujoV2Request, trace_id: str) -> Flujo
         trace_id=trace_id,
         local=local_block,
         companions=companions,
+        object_storage=store_flujo_snapshot(
+            trace_id,
+            {
+                "trace_id": trace_id,
+                "api_version": "v2",
+                "local": local_block,
+                "companions": [c.model_dump(mode="json") for c in companions],
+            },
+        ),
     )

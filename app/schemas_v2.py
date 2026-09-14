@@ -26,6 +26,18 @@ class FlujoV2Response(BaseModel):
     api_version: str = "v2"
     local: dict[str, Any]
     companions: list[CompanionPayload]
+    object_storage: "ObjectStorageRef | None" = None
+
+
+class ObjectStorageRef(BaseModel):
+    backend: str
+    bucket: str
+    object_key: str
+    get_url: str
+    stored: bool
+
+
+FlujoV2Response.model_rebuild()
 
 
 class HealthV2Response(BaseModel):
