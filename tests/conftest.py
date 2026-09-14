@@ -1,6 +1,9 @@
 import os
+import tempfile
 
 os.environ["ENVIRONMENT"] = "test"
+os.environ["OBJECT_STORAGE_BACKEND"] = "local"
+os.environ["OBJECT_STORAGE_LOCAL_DIR"] = tempfile.mkdtemp(prefix="clic-os-test-")
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,6 +13,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.database import Base, get_db
 from app.main import app
+from app.storage.factory import get_object_storage
 
 
 @pytest.fixture()
@@ -30,6 +34,8 @@ def client():
             db.close()
 
     app.dependency_overrides[get_db] = override_get_db
+    get_object_storage.cache_clear()
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+    get_object_storage.cache_clear()

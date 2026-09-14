@@ -29,9 +29,36 @@ def main() -> int:
     assert code == 200
     print("OK metrics v2", metrics)
 
-    code, flujo, _ = call("POST", "/api/v2/flujo", {}, {"X-Trace-Id": trace or "cli-trace"})
+    code, flujo, _ = call(
+        "POST",
+        "/api/v2/flujo",
+        {"origen": "BOG", "destino": "MDE"},
+        {"X-Trace-Id": trace or "cli-trace"},
+    )
     print("POST /api/v2/flujo ->", code, flujo)
-    return 0 if code in (200, 404) else 1
+    if code != 200:
+        return 1
+    companions = flujo.get("companions") or []
+    with_entity = [c for c in companions if c.get("entity")]
+    if len(with_entity) >= 2:
+        print("OK flujo v2 con entidades B y C via HTTP")
+    elif len(with_entity) == 1:
+        print("AVISO: solo una entidad remota; revisa API_B/C o mocks")
+    else:
+        print("AVISO: sin entidades remotas (stub o sin seed v1)")
+
+    os_meta = flujo.get("object_storage") or {}
+    if os_meta.get("stored"):
+        path = os_meta.get("get_url", "")
+        if path.startswith("http"):
+            path = path.replace(BASE.rstrip("/"), "")
+        code2, snap, _ = call("GET", path, None, {"X-Trace-Id": trace or "cli-trace"})
+        if code2 == 200 and snap:
+            print("OK object storage snapshot", snap.get("trace_id"))
+        else:
+            print("FALLO object storage GET", code2)
+            return 1
+    return 0
 
 
 if __name__ == "__main__":
