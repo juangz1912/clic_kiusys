@@ -8,8 +8,8 @@ Sustentación: **16 de septiembre de 2026**
 | Integrante | Nube | Componente principal |
 |------------|------|----------------------|
 | Juan Jose Giraldo | **Oracle OCI** | API A en **OKE** (Vuelo, Pasajero, AsientoAsignado) |
-| Alejandro Hernandez | **GCP** | API B (Mascota / Dueño / Cita — acordar URL) |
-| Alejandro Marin | **Azure o AWS** | API C (Grupo / Ítem / Movimiento — acordar URL) |
+| Integrante B (equipo) | **GCP** | API B (entidades del grupo — acordar URL) |
+| Integrante C (equipo) | **Azure o AWS** | API C (entidades del grupo — acordar URL) |
 
 Componentes transversales (1 por integrante, nube distinta): orquestador, caché, object storage.
 

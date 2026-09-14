@@ -9,8 +9,8 @@ Repositorio: https://github.com/juangz1912/clic_kiusys
 | Integrante | Nube | Rol |
 |------------|------|-----|
 | Juan Jose Giraldo | **Oracle OCI (OKE)** | API A + manifiestos Kubernetes |
-| Alejandro Hernandez | **GCP** | API B |
-| Alejandro Marin | **Azure/AWS** | API C |
+| Integrante B (equipo) | **GCP** | API B |
+| Integrante C (equipo) | **Azure/AWS** | API C |
 
 - **API v2:** `/api/v2/health`, `POST /api/v2/flujo`, `/api/v2/metrics`
 - **Trace-id:** header `X-Trace-Id` en toda la cadena

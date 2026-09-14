@@ -19,7 +19,7 @@ Copia esta plantilla al chat del grupo y rellena cuando cada uno tenga URL.
 - `API_B_BASE_URL` + path GET lista (ej. `/api/mascotas`)
 - `API_C_BASE_URL` + path GET lista (ej. `/api/items`)
 
-## Integrante B — Alejandro Hernandez (GCP)
+## Integrante B — GCP
 
 | Campo | Valor |
 |-------|--------|
@@ -27,7 +27,7 @@ Copia esta plantilla al chat del grupo y rellena cuando cada uno tenga URL.
 | Entidad que expone | (ej. Mascota) |
 | Endpoint GET lista | |
 
-## Integrante C — Alejandro Marin (Azure/AWS)
+## Integrante C — Azure/AWS
 
 | Campo | Valor |
 |-------|--------|
