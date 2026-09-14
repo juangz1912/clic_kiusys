@@ -4,7 +4,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 kubectl apply -f "$ROOT/k8s/namespace.yaml"
+kubectl apply -f "$ROOT/k8s/postgres.yaml"
 kubectl apply -f "$ROOT/k8s/configmap.yaml"
+kubectl apply -f "$ROOT/k8s/companion-mocks.yaml"
 echo "Crea el Secret desde k8s/secret.yaml.example antes de desplegar el Deployment."
 kubectl apply -f "$ROOT/k8s/deployment.yaml"
 kubectl apply -f "$ROOT/k8s/service.yaml"

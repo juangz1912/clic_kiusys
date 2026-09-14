@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: companion-mocks
+  namespace: clic-kiusys
+  labels:
+    app: companion-mocks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: companion-mocks
+  template:
+    metadata:
+      labels:
+        app: companion-mocks
+    spec:
+      containers:
+        - name: mocks
+          image: ghcr.io/juangz1912/clic-kiusys-companion-mocks:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8090
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8090
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8090
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: companion-mocks
+  namespace: clic-kiusys
+spec:
+  selector:
+    app: companion-mocks
+  ports:
+    - port: 80
+      targetPort: 8090
