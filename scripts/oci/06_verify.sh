@@ -16,8 +16,11 @@ if [ -z "$LB_HOST" ]; then
 fi
 
 if [ -n "$LB_HOST" ]; then
-  echo "Probando http://${LB_HOST}/api/v2/health ..."
-  python3 "$ROOT/scripts/test_v2_endpoints.py" "http://${LB_HOST}" || true
+  BASE="http://${LB_HOST}"
+  echo "Sembrando datos demo en ${BASE} ..."
+  BASE_URL="$BASE" "$ROOT/scripts/seed_demo.sh" || true
+  echo "Probando v2 en ${BASE} ..."
+  python3 "$ROOT/scripts/test_v2_endpoints.py" "$BASE" || true
 else
   echo "El LoadBalancer aún no tiene IP/hostname (espera 2-5 min y vuelve a ejecutar)."
 fi
