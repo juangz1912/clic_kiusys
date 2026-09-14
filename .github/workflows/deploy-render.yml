@@ -1,0 +1,50 @@
+name: Deploy Render
+
+on:
+  push:
+    branches: [develop, main]
+
+jobs:
+  deploy-pruebas:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Render (pruebas)
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_PRUEBAS }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          set +e
+          if [ -n "$DEPLOY_HOOK" ]; then
+            curl -f -X POST "$DEPLOY_HOOK" && exit 0
+          fi
+          if [ -n "$RENDER_API_KEY" ]; then
+            curl -f -X POST \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              "https://api.render.com/v1/services/srv-da307rjl550s738c7ne0/deploys" && exit 0
+          fi
+          echo "Sin hook/API Render pruebas; deploy omitido (no falla el job)."
+
+  deploy-produccion:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Render (produccion)
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_PRODUCCION }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          set +e
+          if [ -n "$DEPLOY_HOOK" ]; then
+            curl -f -X POST "$DEPLOY_HOOK" && exit 0
+          fi
+          if [ -n "$RENDER_API_KEY" ]; then
+            curl -f -X POST \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              "https://api.render.com/v1/services/srv-da307ue1egvs73dj4f80/deploys" && exit 0
+          fi
+          echo "Sin hook/API Render produccion; deploy omitido (no falla el job)."
