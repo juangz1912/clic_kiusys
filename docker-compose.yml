@@ -15,6 +15,16 @@ services:
       timeout: 5s
       retries: 5
 
+  mock-companion:
+    build: ./companion_mocks
+    ports:
+      - "8090:8090"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8090/api/health')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api-pruebas:
     build: .
     ports:
@@ -23,8 +33,20 @@ services:
       ENVIRONMENT: pruebas
       DATABASE_URL: postgresql://pss:pss@db-pruebas:5432/pss_pruebas
       HOLD_MINUTES: 10
+      CLOUD_PROVIDER: oci
+      OKE_CLUSTER_NAME: local-docker
+      API_B_BASE_URL: http://mock-companion:8090
+      API_C_BASE_URL: http://mock-companion:8090
+      INTEGRATION_STUB_WHEN_UNREACHABLE: "false"
+      PUBLIC_API_BASE_URL: http://localhost:8001
+      OBJECT_STORAGE_BACKEND: local
+      OBJECT_STORAGE_LOCAL_DIR: /data/object-storage
+    volumes:
+      - object_storage_data:/data/object-storage
     depends_on:
       db-pruebas:
+        condition: service_healthy
+      mock-companion:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')\""]
@@ -57,8 +79,15 @@ services:
       ENVIRONMENT: produccion
       DATABASE_URL: postgresql://pss:pss_prod@db-produccion:5432/pss_produccion
       HOLD_MINUTES: 10
+      CLOUD_PROVIDER: oci
+      OKE_CLUSTER_NAME: local-docker-prod
+      API_B_BASE_URL: http://mock-companion:8090
+      API_C_BASE_URL: http://mock-companion:8090
+      INTEGRATION_STUB_WHEN_UNREACHABLE: "false"
     depends_on:
       db-produccion:
+        condition: service_healthy
+      mock-companion:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')\""]
@@ -70,3 +99,4 @@ services:
 volumes:
   pg_pruebas:
   pg_produccion:
+  object_storage_data:
