@@ -65,12 +65,15 @@ Secrets GitHub: `RENDER_DEPLOY_HOOK_PRUEBAS`, `RENDER_DEPLOY_HOOK_PRODUCCION`, `
 
 ## Despliegue OKE (Seguimiento #2)
 
+Guía completa: [docs/OCI_DEPLOY.md](docs/OCI_DEPLOY.md)
+
 ```bash
-# Tras configurar kubectl en OCI
-cp k8s/secret.yaml.example k8s/secret.yaml   # editar valores reales, no commitear
-kubectl apply -f k8s/secret.yaml
-./scripts/k8s_apply.sh
+cp scripts/oci/oci.env.example scripts/oci/oci.env   # completar y NO commitear
+chmod +x scripts/oci/*.sh
+./scripts/oci/deploy_all.sh
 ```
+
+Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.md)
 
 ## Pipelines
 

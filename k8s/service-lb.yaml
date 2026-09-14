@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: clic-kiusys-api-lb
+  namespace: clic-kiusys
+  annotations:
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+spec:
+  type: LoadBalancer
+  selector:
+    app: clic-kiusys-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000

@@ -68,17 +68,21 @@ jobs:
           DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_PRODUCCION }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
+          deploy_ok=false
           if [ -n "$DEPLOY_HOOK" ]; then
-            curl -f -X POST "$DEPLOY_HOOK"
-            echo "skipped=false" >> "$GITHUB_OUTPUT"
+            if curl -f -X POST "$DEPLOY_HOOK"; then deploy_ok=true; fi
           elif [ -n "$RENDER_API_KEY" ]; then
-            curl -f -X POST \
+            if curl -f -X POST \
               -H "Authorization: Bearer $RENDER_API_KEY" \
-              "https://api.render.com/v1/services/srv-da307ue1egvs73dj4f80/deploys"
+              "https://api.render.com/v1/services/srv-da307ue1egvs73dj4f80/deploys"; then
+              deploy_ok=true
+            fi
+          fi
+          if [ "$deploy_ok" = "true" ]; then
             echo "skipped=false" >> "$GITHUB_OUTPUT"
           else
             echo "skipped=true" >> "$GITHUB_OUTPUT"
-            echo "Sin credenciales Render; omitiendo deploy cloud"
+            echo "Deploy Render omitido o fallido (OCI es destino S2); pipeline continua"
           fi
 
       - name: Wait for Render deploy
