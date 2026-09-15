@@ -13,12 +13,16 @@ class Settings(BaseSettings):
     cloud_provider: str = "oci"
     oke_cluster_name: str = "clic-kiusys-oke"
 
-    api_b_base_url: str = ""
-    api_b_entity_path: str = "/api/mascotas"
-    api_c_base_url: str = ""
-    api_c_entity_path: str = "/api/items"
+    api_b_base_url: str = "http://aa11cf2e5dd814f8cbf7485099e3b46f-618055784.us-east-1.elb.amazonaws.com"
+    api_b_animal_path: str = "/api/v2/animals"
+    api_b_adoptante_path: str = "/api/v2/adoptantes"
+    api_b_adopcion_path: str = "/api/v2/adopciones"
+    api_c_base_url: str = "http://medical-documents-api-34-123-58-136.sslip.io"
+    api_c_imagen_path: str = "/imagenes"
+    api_c_nota_path: str = "/notas-medicas"
+    api_c_documento_path: str = "/documentos-generados"
     integration_timeout_seconds: float = 10.0
-    integration_stub_when_unreachable: bool = True
+    integration_stub_when_unreachable: bool = False
 
     observability_saas_url: str = ""
 
