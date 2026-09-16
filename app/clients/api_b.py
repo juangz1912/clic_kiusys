@@ -1,31 +1,43 @@
 from typing import Any
 
-import httpx
-
-from app.clients.http_utils import outbound_headers
+from app.clients.http_utils import fetch_remote_entity
 from app.config import settings
 
 
 def fetch_companion_entity_b(trace_id: str) -> dict[str, Any]:
-    base = settings.api_b_base_url.rstrip("/")
-    if not base:
-        return {"source": "api_b", "configured": False, "entity": None}
+    return fetch_animal(trace_id)
 
-    url = f"{base}{settings.api_b_entity_path}"
-    try:
-        with httpx.Client(timeout=settings.integration_timeout_seconds) as client:
-            response = client.get(url, headers=outbound_headers(trace_id))
-            response.raise_for_status()
-            data = response.json()
-            entity = data[0] if isinstance(data, list) and data else data
-            return {"source": "api_b", "configured": True, "entity": entity, "url": url}
-    except Exception as exc:
-        if settings.integration_stub_when_unreachable:
-            return {
-                "source": "api_b",
-                "configured": True,
-                "entity": None,
-                "error": str(exc),
-                "url": url,
-            }
-        raise
+
+def fetch_animal(trace_id: str) -> dict[str, Any]:
+    return fetch_remote_entity(
+        "api_b_animal",
+        settings.api_b_base_url,
+        settings.api_b_animal_path,
+        trace_id,
+    )
+
+
+def fetch_adoptante(trace_id: str) -> dict[str, Any]:
+    return fetch_remote_entity(
+        "api_b_adoptante",
+        settings.api_b_base_url,
+        settings.api_b_adoptante_path,
+        trace_id,
+    )
+
+
+def fetch_adopcion(trace_id: str) -> dict[str, Any]:
+    return fetch_remote_entity(
+        "api_b_adopcion",
+        settings.api_b_base_url,
+        settings.api_b_adopcion_path,
+        trace_id,
+    )
+
+
+def fetch_all_b(trace_id: str) -> dict[str, dict[str, Any]]:
+    return {
+        "animal": fetch_animal(trace_id),
+        "adoptante": fetch_adoptante(trace_id),
+        "adopcion": fetch_adopcion(trace_id),
+    }
