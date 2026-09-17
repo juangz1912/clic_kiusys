@@ -21,11 +21,19 @@ class CompanionPayload(BaseModel):
     url: str | None = None
 
 
+class VinculoPayload(BaseModel):
+    rol: str
+    local: dict[str, Any]
+    api_b: CompanionPayload
+    api_c: CompanionPayload
+
+
 class FlujoV2Response(BaseModel):
     trace_id: str
     api_version: str = "v2"
     local: dict[str, Any]
     companions: list[CompanionPayload]
+    vinculos: list[VinculoPayload] = Field(default_factory=list)
     object_storage: "ObjectStorageRef | None" = None
 
 
