@@ -4,6 +4,9 @@ import tempfile
 os.environ["ENVIRONMENT"] = "test"
 os.environ["OBJECT_STORAGE_BACKEND"] = "local"
 os.environ["OBJECT_STORAGE_LOCAL_DIR"] = tempfile.mkdtemp(prefix="clic-os-test-")
+os.environ["API_B_BASE_URL"] = ""
+os.environ["API_C_BASE_URL"] = ""
+os.environ["INTEGRATION_STUB_WHEN_UNREACHABLE"] = "true"
 
 import pytest
 from fastapi.testclient import TestClient

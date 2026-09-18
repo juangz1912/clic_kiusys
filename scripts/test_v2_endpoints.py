@@ -40,12 +40,18 @@ def main() -> int:
         return 1
     companions = flujo.get("companions") or []
     with_entity = [c for c in companions if c.get("entity")]
-    if len(with_entity) >= 2:
+    if len(with_entity) >= 6:
         print("OK flujo v2 con entidades B y C via HTTP")
+    elif len(with_entity) >= 2:
+        print("AVISO: faltan entidades remotas; revisa API_B/C")
     elif len(with_entity) == 1:
-        print("AVISO: solo una entidad remota; revisa API_B/C o mocks")
+        print("AVISO: solo una entidad remota; revisa API_B/C")
     else:
         print("AVISO: sin entidades remotas (stub o sin seed v1)")
+
+    vinculos = flujo.get("vinculos") or []
+    if vinculos:
+        print("OK vinculos", [v.get("rol") for v in vinculos])
 
     os_meta = flujo.get("object_storage") or {}
     if os_meta.get("stored"):
