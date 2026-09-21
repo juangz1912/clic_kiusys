@@ -35,8 +35,14 @@ services:
       HOLD_MINUTES: 10
       CLOUD_PROVIDER: oci
       OKE_CLUSTER_NAME: local-docker
-      API_B_BASE_URL: http://mock-companion:8090
-      API_C_BASE_URL: http://mock-companion:8090
+      API_B_BASE_URL: http://aa11cf2e5dd814f8cbf7485099e3b46f-618055784.us-east-1.elb.amazonaws.com
+      API_C_BASE_URL: http://medical-documents-api-34-123-58-136.sslip.io
+      API_B_ANIMAL_PATH: /api/v2/animals
+      API_B_ADOPTANTE_PATH: /api/v2/adoptantes
+      API_B_ADOPCION_PATH: /api/v2/adopciones
+      API_C_IMAGEN_PATH: /imagenes
+      API_C_NOTA_PATH: /notas-medicas
+      API_C_DOCUMENTO_PATH: /documentos-generados
       INTEGRATION_STUB_WHEN_UNREACHABLE: "false"
       PUBLIC_API_BASE_URL: http://localhost:8001
       OBJECT_STORAGE_BACKEND: local
@@ -45,8 +51,6 @@ services:
       - object_storage_data:/data/object-storage
     depends_on:
       db-pruebas:
-        condition: service_healthy
-      mock-companion:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')\""]
@@ -81,13 +85,17 @@ services:
       HOLD_MINUTES: 10
       CLOUD_PROVIDER: oci
       OKE_CLUSTER_NAME: local-docker-prod
-      API_B_BASE_URL: http://mock-companion:8090
-      API_C_BASE_URL: http://mock-companion:8090
+      API_B_BASE_URL: http://aa11cf2e5dd814f8cbf7485099e3b46f-618055784.us-east-1.elb.amazonaws.com
+      API_C_BASE_URL: http://medical-documents-api-34-123-58-136.sslip.io
+      API_B_ANIMAL_PATH: /api/v2/animals
+      API_B_ADOPTANTE_PATH: /api/v2/adoptantes
+      API_B_ADOPCION_PATH: /api/v2/adopciones
+      API_C_IMAGEN_PATH: /imagenes
+      API_C_NOTA_PATH: /notas-medicas
+      API_C_DOCUMENTO_PATH: /documentos-generados
       INTEGRATION_STUB_WHEN_UNREACHABLE: "false"
     depends_on:
       db-produccion:
-        condition: service_healthy
-      mock-companion:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')\""]
