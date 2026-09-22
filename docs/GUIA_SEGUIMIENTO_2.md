@@ -7,9 +7,9 @@ Sustentación: **16 de septiembre de 2026**
 
 | Integrante | Nube | Componente principal |
 |------------|------|----------------------|
-| Juan Jose Giraldo | **Oracle OCI** | API A en **OKE** (Vuelo, Pasajero, AsientoAsignado) |
-| Integrante B (equipo) | **GCP** | API B (entidades del grupo — acordar URL) |
-| Integrante C (equipo) | **Azure o AWS** | API C (entidades del grupo — acordar URL) |
+| Juan Jose Giraldo | **Oracle OCI** | API A en **OKE** (Vuelo, Pasajero, AsientoAsignado) + Object Storage |
+| Angel Avirama | **AWS** | API B adopción (`/api/v2/animals`, `/api/v2/adoptantes`, `/api/v2/adopciones`) |
+| Leonardo Giraldo | **GCP** | API C documentos (`/imagenes`, `/notas-medicas`, `/documentos-generados`) |
 
 Componentes transversales (1 por integrante, nube distinta): orquestador, caché, object storage.
 
@@ -20,16 +20,16 @@ Diagrama de referencia: `Arquitectura_Multicloud_Seguimiento2_2026-2.png` (carpe
 | Método | Ruta | Uso |
 |--------|------|-----|
 | GET | `/api/v2/health` | Health con metadata OCI/OKE y trace-id |
-| POST | `/api/v2/flujo` | Agrega vuelo local + entidades HTTP de B y C |
+| POST | `/api/v2/flujo` | Vínculos: Vuelo–Animal–Imagen, Pasajero–Adoptante–NotaMedica, Asiento–Adopcion–DocumentoGenerado |
 | GET | `/api/v2/metrics` | Métricas RED básicas por endpoint v2 |
 
 Headers: **`X-Trace-Id`** (entrada/salida y llamadas a compañeros).
 
 Variables `.env`:
 
-- `API_B_BASE_URL`, `API_B_ENTITY_PATH` (default `/api/mascotas`)
-- `API_C_BASE_URL`, `API_C_ENTITY_PATH` (default `/api/items`)
-- `INTEGRATION_STUB_WHEN_UNREACHABLE=true` permite demo si B/C caen (incluye error en JSON)
+- `API_B_BASE_URL` (Angel, AWS), `API_B_ANIMAL_PATH`, `API_B_ADOPTANTE_PATH`, `API_B_ADOPCION_PATH`
+- `API_C_BASE_URL` (Leonardo, GCP), `API_C_IMAGEN_PATH`, `API_C_NOTA_PATH`, `API_C_DOCUMENTO_PATH`
+- `INTEGRATION_STUB_WHEN_UNREACHABLE=false` en demos con las APIs reales; `true` para tests locales
 
 ## Probar en local
 

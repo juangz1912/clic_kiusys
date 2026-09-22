@@ -26,18 +26,23 @@ Nube: Oracle OCI (OKE + Object Storage bucket: clic-kiusys-flow)
   GET  ${BASE}/api/v2/entidades/vuelos
   (alternativa v1: GET ${BASE}/api/vuelos)
 
+--- Vinculos POST /api/v2/flujo ---
+  Vuelo + Animal (Angel /api/v2/animals) + Imagen (Leonardo /imagenes)
+  Pasajero + Adoptante (/api/v2/adoptantes) + NotaMedica (/notas-medicas)
+  Asiento + Adopcion (/api/v2/adopciones) + DocumentoGenerado (/documentos-generados)
+
 --- Object Storage (JSON acumulado del flujo + adjuntos) ---
   Tras POST /api/v2/flujo la respuesta trae object_storage.get_url
   GET  ${BASE}/api/v2/storage/flujo/{trace_id}
   POST ${BASE}/api/v2/storage/adjunto  (multipart, header X-Trace-Id)
   GET  ${BASE}/api/v2/storage/adjunto/{trace_id}/{filename}
 
---- Necesito de ustedes ---
-  Integrante B (GCP): URL base + path GET lista (ej. /api/mascotas)
-  Integrante C (Azure/AWS): URL base + path GET lista (ej. /api/items)
-  URLs publicas (no localhost). Mismo header X-Trace-Id en toda la cadena.
+--- APIs del equipo ya integradas ---
+  Angel (AWS): http://aa11cf2e5dd814f8cbf7485099e3b46f-618055784.us-east-1.elb.amazonaws.com
+  Leonardo (GCP): http://medical-documents-api-34-123-58-136.sslip.io
+  Header: X-Trace-Id en toda la cadena.
 
---- Roles transversales (confirmen reparto) ---
+--- Roles transversales ---
   MS orquestador | Cola/DLQ | Cache | (Object Storage = yo en OCI)
 
 --- Prueba rapida ---

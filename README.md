@@ -8,15 +8,14 @@ Repositorio: https://github.com/juangz1912/clic_kiusys
 
 | Integrante | Nube | Rol |
 |------------|------|-----|
-| Juan Jose Giraldo | **Oracle OCI (OKE)** | API A + manifiestos Kubernetes |
-| Integrante B (equipo) | **GCP** | API B |
-| Integrante C (equipo) | **Azure/AWS** | API C |
+| Juan Jose Giraldo | **Oracle OCI (OKE)** | API A + Object Storage |
+| Angel Avirama | **AWS** | API B — adopción ([Api_Pet_Adoption](https://github.com/AngelAvirama/Api_Pet_Adoption)) |
+| Leonardo Giraldo | **GCP** | API C — documentos médicos ([MedicalDevops](https://github.com/LeonardoG2005/MedicalDevops)) |
 
-- **API v2:** `/api/v2/health`, `POST /api/v2/flujo`, `/api/v2/metrics`
+- **API v2:** `/api/v2/health`, `POST /api/v2/flujo` (vínculos Animal–Vuelo–Imagen, Adoptante–Pasajero–NotaMedica, Adopcion–AsientoAsignado–DocumentoGenerado), `/api/v2/metrics`
 - **Trace-id:** header `X-Trace-Id` en toda la cadena
 - Guía detallada: [docs/GUIA_SEGUIMIENTO_2.md](docs/GUIA_SEGUIMIENTO_2.md)
-- Manifiestos OKE: carpeta [k8s/](k8s/)
-- Diagrama del equipo: ver `Arquitectura_Multicloud_Seguimiento2_2026-2.png` en la carpeta de trabajo del curso
+- Integración del equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.md)
 
 ## Entidades (v1)
 
