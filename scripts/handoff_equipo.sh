@@ -24,7 +24,8 @@ Nube: Oracle OCI (OKE + Object Storage bucket: clic-kiusys-flow)
 
 --- Consumir entidad local (Vuelo) desde vuestra API v2 ---
   GET  ${BASE}/api/v2/entidades/vuelos
-  (alternativa v1: GET ${BASE}/api/vuelos)
+  GET  ${BASE}/api/v2/entidades/pasajeros
+  GET  ${BASE}/api/v2/entidades/asientos-asignados
 
 --- Vinculos POST /api/v2/flujo ---
   Vuelo + Animal (Angel /api/v2/animals) + Imagen (Leonardo /imagenes)

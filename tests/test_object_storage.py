@@ -38,3 +38,14 @@ def test_entidades_vuelos_v2(client):
     response = client.get("/api/v2/entidades/vuelos")
     assert response.status_code == 200
     assert len(response.json()) >= 1
+
+    client.post(
+        "/api/pasajeros",
+        json={"nombre": "Ana", "documento": "CCEV2", "tipo": "adulto"},
+    )
+    pasajeros = client.get("/api/v2/entidades/pasajeros")
+    assert pasajeros.status_code == 200
+    assert len(pasajeros.json()) >= 1
+
+    asientos = client.get("/api/v2/entidades/asientos-asignados")
+    assert asientos.status_code == 200
