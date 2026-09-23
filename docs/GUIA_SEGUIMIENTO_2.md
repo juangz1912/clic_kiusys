@@ -1,7 +1,7 @@
 # Guía Seguimiento #2 — Multicloud (Integrante A / OCI)
 
 Repositorio: https://github.com/juangz1912/clic_kiusys  
-Sustentación: **16 de septiembre de 2026**
+Sustentación: acordada con el grupo (el PDF original decía 16 de septiembre de 2026).
 
 ## Equipo y nubes
 
@@ -44,7 +44,7 @@ Swagger: http://localhost:8001/docs → sección **v2**.
 ## Despliegue OKE (OCI)
 
 1. Crear cluster **OKE** y conectar `kubectl`.
-2. BD gestionada (Autonomous PostgreSQL o MySQL) y `DATABASE_URL` en Secret.
+2. Postgres en el cluster (`k8s/postgres.yaml`, block volume) y `DATABASE_URL` en Secret.
 3. Copiar `k8s/secret.yaml.example` → aplicar Secret con URLs reales de B/C.
 4. Build/push imagen Docker del `Dockerfile`.
 5. Actualizar imagen en `k8s/deployment.yaml`.

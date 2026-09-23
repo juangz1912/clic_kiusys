@@ -4,7 +4,32 @@ API REST para un mini PSS de aerolínea con las entidades **Vuelo**, **Pasajero*
 
 Repositorio: https://github.com/juangz1912/clic_kiusys
 
-## Seguimiento #2 — Multicloud (OCI)
+## Arquitectura del grupo
+
+```mermaid
+flowchart LR
+  Orq[Orquestador Leonardo GCP]
+  ApiA[API A Juan OCI OKE]
+  ApiB[API B Angel AWS]
+  ApiC[API C Leonardo GCP]
+  Bucket[Object Storage Juan OCI]
+  Orq --> ApiA
+  ApiA --> ApiB
+  ApiA --> ApiC
+  ApiA --> Bucket
+```
+
+| Integrante | Nube | Pieza |
+|------------|------|--------|
+| Juan José Giraldo | Oracle OCI | API A en OKE + Object Storage |
+| Angel Avirama | AWS | API B adopción |
+| Leonardo Giraldo | GCP | API C documentos + orquestador |
+
+Servicios OCI usados: cluster OKE, registro OCIR, Load Balancer flexible (10 Mbps), Block Volume para Postgres, VCN y Object Storage. El DNS `sslip.io` apunta a la IP del balanceador sin costo.
+
+URL pública: http://157-137-193-66.sslip.io
+
+Caché y cola las llevan otros integrantes. El tablero SaaS del grupo se conecta después (`OTEL_EXPORTER_OTLP_ENDPOINT`).
 
 | Integrante | Nube | Rol |
 |------------|------|-----|
@@ -76,8 +101,8 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Pipelines
 
-- `ci-pruebas.yml` / `ci-produccion.yml` — tests, Docker, Render
-- `k8s-validate.yml` — validación de manifiestos Kubernetes
+- `deploy-oke.yml` — en `main`: tests, imagen amd64 a OCIR y rollout en OKE
+- `deploy-render.yml` — hook de Render en `develop` (pruebas) y `main` (producción)
 
 ## Stack
 
@@ -89,4 +114,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.0.0** (Seguimiento #2).
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.1.0** (Seguimiento #2 en OKE).

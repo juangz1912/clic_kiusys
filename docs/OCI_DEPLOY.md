@@ -71,13 +71,13 @@ curl -s "http://EXTERNAL-IP/api/v2/health" | python3 -m json.tool
 python3 scripts/test_v2_endpoints.py "http://EXTERNAL-IP"
 ```
 
-## 5. Integración compañeros (GCP / Azure)
+## 5. Integración compañeros (Angel AWS / Leonardo GCP)
 
-En `scripts/oci/oci.env`:
+En `scripts/oci/oci.env` ya están las URLs públicas. Si cambian:
 
 ```bash
-API_B_BASE_URL=https://url-api-b-gcp
-API_C_BASE_URL=https://url-api-c-azure
+API_B_BASE_URL=http://aa11cf2e5dd814f8cbf7485099e3b46f-618055784.us-east-1.elb.amazonaws.com
+API_C_BASE_URL=http://medical-documents-api-34-123-58-136.sslip.io
 INTEGRATION_STUB_WHEN_UNREACHABLE=false
 ```
 
