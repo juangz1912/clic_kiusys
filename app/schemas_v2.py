@@ -13,6 +13,23 @@ class FlujoV2Request(BaseModel):
     fecha: date | None = None
 
 
+class MensajeV2Request(BaseModel):
+    """Mensaje acumulado que envía el orquestador. Esta API le agrega api_a."""
+
+    mensaje: dict[str, Any] = Field(default_factory=dict)
+    vuelo_id: int | None = None
+    origen: str | None = Field(default=None, min_length=3, max_length=3)
+    destino: str | None = Field(default=None, min_length=3, max_length=3)
+    fecha: date | None = None
+
+
+class MensajeV2Response(BaseModel):
+    trace_id: str
+    api_version: str = "v2"
+    mensaje: dict[str, Any]
+    object_storage: "ObjectStorageRef | None" = None
+
+
 class CompanionPayload(BaseModel):
     source: str
     configured: bool
@@ -46,6 +63,7 @@ class ObjectStorageRef(BaseModel):
 
 
 FlujoV2Response.model_rebuild()
+MensajeV2Response.model_rebuild()
 
 
 class HealthV2Response(BaseModel):

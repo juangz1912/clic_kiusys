@@ -7,7 +7,14 @@ from app.clients.api_b import fetch_all_b
 from app.clients.api_c import fetch_all_c
 from app.models.entities import AsientoAsignado, Pasajero, Vuelo
 from app.schemas import AsientoAsignadoRead, PasajeroRead, VueloRead
-from app.schemas_v2 import CompanionPayload, FlujoV2Request, FlujoV2Response, VinculoPayload
+from app.schemas_v2 import (
+    CompanionPayload,
+    FlujoV2Request,
+    FlujoV2Response,
+    MensajeV2Request,
+    MensajeV2Response,
+    VinculoPayload,
+)
 from app.services.object_storage_service import store_flujo_snapshot
 
 
@@ -39,14 +46,33 @@ def _resolve_local_vuelo(db: Session, payload: FlujoV2Request) -> VueloRead:
     return VueloRead.model_validate(vuelo)
 
 
-def _latest_pasajero(db: Session) -> PasajeroRead | None:
-    row = db.query(Pasajero).order_by(Pasajero.id.desc()).first()
+def _asiento_del_vuelo(db: Session, vuelo_id: int) -> AsientoAsignadoRead | None:
+    row = (
+        db.query(AsientoAsignado)
+        .filter(AsientoAsignado.vuelo_id == vuelo_id)
+        .order_by(AsientoAsignado.id.desc())
+        .first()
+    )
+    return AsientoAsignadoRead.model_validate(row) if row else None
+
+
+def _pasajero_del_asiento(db: Session, asiento: AsientoAsignadoRead | None) -> PasajeroRead | None:
+    if not asiento or not asiento.pasajero_id:
+        return None
+    row = db.get(Pasajero, asiento.pasajero_id)
     return PasajeroRead.model_validate(row) if row else None
 
 
-def _latest_asiento(db: Session) -> AsientoAsignadoRead | None:
-    row = db.query(AsientoAsignado).order_by(AsientoAsignado.id.desc()).first()
-    return AsientoAsignadoRead.model_validate(row) if row else None
+def api_a_block(db: Session, payload: FlujoV2Request) -> dict[str, Any]:
+    vuelo = _resolve_local_vuelo(db, payload)
+    asiento = _asiento_del_vuelo(db, vuelo.id)
+    pasajero = _pasajero_del_asiento(db, asiento)
+    return {
+        "cloud": "oci",
+        "vuelo": vuelo.model_dump(mode="json"),
+        "pasajero": pasajero.model_dump(mode="json") if pasajero else None,
+        "asiento_asignado": asiento.model_dump(mode="json") if asiento else None,
+    }
 
 
 def _payload(raw: dict[str, Any]) -> CompanionPayload:
@@ -55,8 +81,8 @@ def _payload(raw: dict[str, Any]) -> CompanionPayload:
 
 def build_flujo_v2(db: Session, payload: FlujoV2Request, trace_id: str) -> FlujoV2Response:
     local = _resolve_local_vuelo(db, payload)
-    pasajero = _latest_pasajero(db)
-    asiento = _latest_asiento(db)
+    asiento = _asiento_del_vuelo(db, local.id)
+    pasajero = _pasajero_del_asiento(db, asiento)
 
     b_raw = fetch_all_b(trace_id)
     c_raw = fetch_all_c(trace_id)
@@ -114,3 +140,24 @@ def build_flujo_v2(db: Session, payload: FlujoV2Request, trace_id: str) -> Flujo
         vinculos=vinculos,
         object_storage=store_flujo_snapshot(trace_id, snapshot),
     )
+
+
+def append_api_a(db: Session, payload: MensajeV2Request, trace_id: str) -> MensajeV2Response:
+    """El orquestador envía el mensaje; esta API agrega sus entidades y lo persiste."""
+    bloque = api_a_block(
+        db,
+        FlujoV2Request(
+            vuelo_id=payload.vuelo_id,
+            origen=payload.origen,
+            destino=payload.destino,
+            fecha=payload.fecha,
+        ),
+    )
+    mensaje = dict(payload.mensaje)
+    pasos = list(mensaje.get("pasos") or [])
+    pasos.append({"api": "api_a", "cloud": "oci", "trace_id": trace_id, "entidades": bloque})
+    mensaje["pasos"] = pasos
+    mensaje["api_a"] = bloque
+    mensaje["trace_id"] = trace_id
+    ref = store_flujo_snapshot(trace_id, mensaje)
+    return MensajeV2Response(trace_id=trace_id, mensaje=mensaje, object_storage=ref)

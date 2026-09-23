@@ -88,4 +88,50 @@ def test_v2_metrics_endpoint(client):
     client.get("/api/v2/health")
     metrics = client.get("/api/v2/metrics")
     assert metrics.status_code == 200
-    assert metrics.json()["api_version"] == "v2"
+    body = metrics.json()
+    assert body["api_version"] == "v2"
+    health = body["endpoints"]["GET /api/v2/health"]
+    assert "latency_p50_ms" in health
+    assert "latency_p95_ms" in health
+
+
+def test_mensaje_agrega_api_a(client):
+    vuelo = client.post(
+        "/api/vuelos",
+        json={
+            "numero_vuelo": "MSG1",
+            "origen": "BOG",
+            "destino": "MDE",
+            "fecha": "2026-09-23",
+            "aeronave": "A320",
+            "capacidad": 180,
+        },
+    ).json()
+    pasajero = client.post(
+        "/api/pasajeros",
+        json={"nombre": "Ana", "documento": "CCMSG1", "tipo": "adulto"},
+    ).json()
+    client.post(
+        "/api/asientos-asignados",
+        json={
+            "vuelo_id": vuelo["id"],
+            "pasajero_id": pasajero["id"],
+            "fila": 4,
+            "columna": "C",
+            "clase": "Y",
+            "estado": "seleccionado",
+        },
+    )
+    response = client.post(
+        "/api/v2/mensaje",
+        json={"mensaje": {"origen": "orquestador"}, "vuelo_id": vuelo["id"]},
+        headers={"X-Trace-Id": "msg-1"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mensaje"]["api_a"]["vuelo"]["id"] == vuelo["id"]
+    assert body["mensaje"]["api_a"]["pasajero"]["id"] == pasajero["id"]
+    assert body["object_storage"]["stored"] is True
+    listed = client.get("/api/v2/storage/flujo")
+    assert listed.status_code == 200
+    assert any(item["trace_id"] == "msg-1" for item in listed.json()["items"])
