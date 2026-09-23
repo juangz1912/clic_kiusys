@@ -12,3 +12,4 @@ scripts/oci/oci.env
 scripts/oci/.last_image
 k8s/secret.yaml
 data/object-storage/
+scripts/oci/.oke_ids
