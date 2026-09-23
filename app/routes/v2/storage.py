@@ -4,9 +4,20 @@ from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from fastapi.responses import Response
 
 from app.schemas_v2 import ObjectStorageRef
-from app.services.object_storage_service import load_adjunto, load_flujo_snapshot, store_adjunto
+from app.services.object_storage_service import (
+    list_flujo_snapshots,
+    load_adjunto,
+    load_flujo_snapshot,
+    store_adjunto,
+)
 
 router = APIRouter()
+
+
+@router.get("/storage/flujo")
+def list_flujos():
+    """Consumidor: snapshots guardados (trace-id + object key)."""
+    return {"items": list_flujo_snapshots()}
 
 
 @router.get("/storage/flujo/{trace_id}")

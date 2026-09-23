@@ -69,3 +69,17 @@ class OciObjectStorage:
         response = self._get_object(object_key)
         content_type = response.get("ContentType") or "application/octet-stream"
         return response["Body"].read(), content_type
+
+    def list_keys(self, prefix: str) -> list[str]:
+        keys: list[str] = []
+        token = None
+        while True:
+            kwargs: dict[str, Any] = {"Bucket": self.bucket, "Prefix": prefix}
+            if token:
+                kwargs["ContinuationToken"] = token
+            page = self.client.list_objects_v2(**kwargs)
+            keys.extend(item["Key"] for item in page.get("Contents") or [])
+            if not page.get("IsTruncated"):
+                break
+            token = page.get("NextContinuationToken")
+        return keys

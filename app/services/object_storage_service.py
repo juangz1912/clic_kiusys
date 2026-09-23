@@ -59,3 +59,14 @@ def store_adjunto(trace_id: str, filename: str, data: bytes, content_type: str) 
 def load_adjunto(trace_id: str, filename: str) -> tuple[bytes, str]:
     storage = get_object_storage()
     return storage.get_bytes(adjunto_object_key(trace_id, filename))
+
+
+def list_flujo_snapshots() -> list[dict[str, str]]:
+    storage = get_object_storage()
+    items = []
+    for key in storage.list_keys(f"{FLUJO_PREFIX}/"):
+        name = key.rsplit("/", 1)[-1]
+        if not name.endswith(".json"):
+            continue
+        items.append({"trace_id": name[: -len(".json")], "object_key": key, "backend": storage.backend})
+    return items

@@ -46,3 +46,13 @@ class LocalObjectStorage:
         meta = path.with_suffix(path.suffix + ".meta")
         content_type = meta.read_text(encoding="utf-8") if meta.exists() else "application/octet-stream"
         return path.read_bytes(), content_type
+
+    def list_keys(self, prefix: str) -> list[str]:
+        root = self._path(prefix)
+        if not root.exists():
+            return []
+        keys: list[str] = []
+        for path in root.rglob("*"):
+            if path.is_file() and not path.name.endswith(".meta"):
+                keys.append(str(path.relative_to(self.root)))
+        return sorted(keys)
