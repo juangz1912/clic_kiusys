@@ -41,7 +41,7 @@ Estados de asiento: `seleccionado`, `asignado`, `expirado`.
 |----------|-----------|-----------|---------------|
 | Pruebas (Render) | https://clic-kiusys-pruebas.onrender.com | http://localhost:8001 | postgres puerto 5433 |
 | Producción (Render) | https://clic-kiusys-prod.onrender.com | http://localhost:8002 | postgres puerto 5434 |
-| OKE (OCI) | Ingress configurado en `k8s/ingress.yaml` | — | Autonomous DB (equipo) |
+| OKE (OCI, sa-bogota-1) | http://157-137-193-66.sslip.io | — | Postgres en cluster (block volume OCI) |
 
 ## Ejecución local
 

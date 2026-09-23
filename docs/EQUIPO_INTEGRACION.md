@@ -3,7 +3,7 @@
 Generar bloque listo para el chat:
 
 ```bash
-./scripts/handoff_equipo.sh https://clic-kiusys-pruebas.onrender.com
+./scripts/handoff_equipo.sh http://157-137-193-66.sslip.io
 ```
 
 ## Integrante A — Juan (OCI / OKE + Object Storage)
@@ -13,7 +13,8 @@ Generar bloque listo para el chat:
 | Repo | https://github.com/juangz1912/clic_kiusys |
 | Nube | **Oracle OCI** |
 | Rol transversal | **Object Storage** + consumidor (JSON flujo + adjuntos) |
-| URL base API | Render pruebas: https://clic-kiusys-pruebas.onrender.com |
+| URL base API (OKE) | http://157-137-193-66.sslip.io |
+| Cluster | OKE `clic-kiusys-oke`, sa-bogota-1, 2 nodos E5.Flex, HPA 2-5 réplicas |
 
 ### Endpoints v2 (header `X-Trace-Id` obligatorio)
 
