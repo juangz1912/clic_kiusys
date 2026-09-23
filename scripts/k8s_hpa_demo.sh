@@ -8,7 +8,7 @@ echo "Réplicas antes:"
 kubectl -n "$NAMESPACE" get hpa,deploy/clic-kiusys-api
 
 kubectl -n "$NAMESPACE" run load-hpa-$RANDOM --rm -i --restart=Never \
-  --image=busybox:1.36 \
+  --image=docker.io/library/busybox:1.36 \
   -- sh -c "for i in \$(seq 1 $DURATION); do wget -q -O- http://clic-kiusys-api/api/v2/health >/dev/null; done" &
 LOAD_PID=$!
 
