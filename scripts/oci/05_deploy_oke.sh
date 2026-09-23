@@ -36,6 +36,11 @@ if kubectl -n clic-kiusys get secret ocir-secret >/dev/null 2>&1; then
 fi
 kubectl apply -f "$ROOT/k8s/service.yaml"
 kubectl apply -f "$ROOT/k8s/service-lb.yaml"
+
+# OKE no trae metrics-server; sin él el HPA queda en <unknown>
+if ! kubectl -n kube-system get deployment metrics-server >/dev/null 2>&1; then
+  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+fi
 kubectl apply -f "$ROOT/k8s/hpa.yaml"
 
 rm -f "$TMP_API" "$TMP_MOCKS"

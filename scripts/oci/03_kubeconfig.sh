@@ -17,4 +17,17 @@ oci ce cluster create-kubeconfig \
   --kube-endpoint PUBLIC_ENDPOINT
 
 kubectl config use-context "${KUBECONFIG_CONTEXT:-$(kubectl config current-context)}"
+
+if [ "${OCI_CLI_AUTH:-}" = "security_token" ]; then
+  KUBE_USER="$(kubectl config view --minify -o jsonpath='{.contexts[0].context.user}')"
+  kubectl config set-credentials "$KUBE_USER" \
+    --exec-api-version=client.authentication.k8s.io/v1beta1 \
+    --exec-command="$(command -v oci)" \
+    --exec-arg=ce --exec-arg=cluster --exec-arg=generate-token \
+    --exec-arg=--cluster-id --exec-arg="$OKE_CLUSTER_ID" \
+    --exec-arg=--region --exec-arg="$OCI_REGION" \
+    --exec-env=OCI_CLI_AUTH=security_token \
+    --exec-env=REQUESTS_CA_BUNDLE="${REQUESTS_CA_BUNDLE:-}"
+fi
+
 kubectl get nodes

@@ -10,8 +10,10 @@ export OCIR_MOCKS_IMAGE="${OCI_REGION}.ocir.io/${OCIR_NAMESPACE}/${MOCKS_REPO}:$
 echo "Imagen API: $OCIR_IMAGE"
 echo "Imagen mocks: $OCIR_MOCKS_IMAGE"
 
-docker build -t "$OCIR_IMAGE" "$ROOT"
-docker build -t "$OCIR_MOCKS_IMAGE" "$ROOT/companion_mocks"
+# Nodos E5.Flex = linux/amd64; con Ampere A1 usar IMAGE_PLATFORM=linux/arm64
+PLATFORM="${IMAGE_PLATFORM:-linux/amd64}"
+docker build --platform "$PLATFORM" -t "$OCIR_IMAGE" "$ROOT"
+docker build --platform "$PLATFORM" -t "$OCIR_MOCKS_IMAGE" "$ROOT/companion_mocks"
 docker push "$OCIR_IMAGE"
 docker push "$OCIR_MOCKS_IMAGE"
 {
