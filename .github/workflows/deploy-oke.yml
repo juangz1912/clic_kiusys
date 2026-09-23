@@ -1,0 +1,74 @@
+name: Deploy OKE
+
+on:
+  push:
+    branches: [main]
+
+env:
+  OCI_REGION: sa-bogota-1
+  OCIR_NAMESPACE: ax5bqkfrllcm
+  PUBLIC_API_BASE_URL: http://157-137-193-66.sslip.io
+
+jobs:
+  test-build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tests
+        env:
+          ENVIRONMENT: test
+          OBJECT_STORAGE_BACKEND: local
+          API_B_BASE_URL: ""
+          API_C_BASE_URL: ""
+        run: |
+          pip install -r requirements.txt
+          pytest -q
+
+      - name: Build and push OCIR
+        env:
+          OCIR_USERNAME: ${{ secrets.OCIR_USERNAME }}
+          OCIR_AUTH_TOKEN: ${{ secrets.OCIR_AUTH_TOKEN }}
+        run: |
+          echo "$OCIR_AUTH_TOKEN" | docker login ${OCI_REGION}.ocir.io -u "$OCIR_USERNAME" --password-stdin
+          TAG="${GITHUB_SHA::7}"
+          IMAGE="${OCI_REGION}.ocir.io/${OCIR_NAMESPACE}/clic-kiusys:${TAG}"
+          docker build --platform linux/amd64 -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Kubeconfig
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY: ${{ secrets.OCI_CLI_KEY }}
+          OKE_CLUSTER_ID: ${{ secrets.OKE_CLUSTER_ID }}
+        run: |
+          pip install oci-cli
+          mkdir -p "$HOME/.oci"
+          printf '%s\n' "$OCI_CLI_KEY" > "$HOME/.oci/ci_key.pem"
+          chmod 600 "$HOME/.oci/ci_key.pem"
+          cat > "$HOME/.oci/config" << EOF
+[DEFAULT]
+user=$OCI_CLI_USER
+fingerprint=$OCI_CLI_FINGERPRINT
+tenancy=$OCI_CLI_TENANCY
+region=$OCI_REGION
+key_file=$HOME/.oci/ci_key.pem
+EOF
+          curl -sL https://dl.k8s.io/release/v1.32.2/bin/linux/amd64/kubectl -o /tmp/kubectl
+          chmod +x /tmp/kubectl
+          oci ce cluster create-kubeconfig --cluster-id "$OKE_CLUSTER_ID" --file "$HOME/.kube/config" --region "$OCI_REGION" --token-version 2.0.0 --kube-endpoint PUBLIC_ENDPOINT --auth api_key
+
+      - name: Rollout
+        run: |
+          /tmp/kubectl -n clic-kiusys set image deployment/clic-kiusys-api api="$IMAGE"
+          /tmp/kubectl -n clic-kiusys rollout status deployment/clic-kiusys-api --timeout=300s
+
+      - name: Smoke
+        run: curl -sf "${PUBLIC_API_BASE_URL}/api/v2/health"

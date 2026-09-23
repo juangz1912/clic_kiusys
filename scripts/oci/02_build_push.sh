@@ -4,6 +4,9 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 # shellcheck source=/dev/null
 source "$ROOT/scripts/oci/oci.env"
 
+# Tag por commit para que cada despliegue baje una imagen nueva
+IMAGE_TAG="$(git -C "$ROOT" rev-parse --short HEAD)"
+
 export OCIR_IMAGE="${OCI_REGION}.ocir.io/${OCIR_NAMESPACE}/${OCIR_REPO}:${IMAGE_TAG}"
 MOCKS_REPO="${OCIR_MOCKS_REPO:-${OCIR_REPO}-mocks}"
 export OCIR_MOCKS_IMAGE="${OCI_REGION}.ocir.io/${OCIR_NAMESPACE}/${MOCKS_REPO}:${IMAGE_TAG}"
