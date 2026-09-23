@@ -1,3 +1,5 @@
+import hashlib
+import uuid
 from typing import Any
 
 import httpx
@@ -7,8 +9,20 @@ from app.config import settings
 TRACE_HEADER = "X-Trace-Id"
 
 
+def traceparent_header(trace_id: str) -> str:
+    hex_id = trace_id.replace("-", "")
+    if len(hex_id) != 32 or any(c not in "0123456789abcdefABCDEF" for c in hex_id):
+        hex_id = hashlib.sha256(trace_id.encode()).hexdigest()[:32]
+    span_id = uuid.uuid4().hex[:16]
+    return f"00-{hex_id.lower()}-{span_id}-01"
+
+
 def outbound_headers(trace_id: str) -> dict[str, str]:
-    return {TRACE_HEADER: trace_id, "Accept": "application/json"}
+    return {
+        TRACE_HEADER: trace_id,
+        "traceparent": traceparent_header(trace_id),
+        "Accept": "application/json",
+    }
 
 
 def unwrap_entity(data: Any) -> Any:

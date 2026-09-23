@@ -4,7 +4,12 @@ from app.clients.api_b import fetch_adoptante, fetch_animal, fetch_companion_ent
 from app.clients.http_utils import unwrap_entity
 
 
-def test_unwrap_entity_from_data_wrapper():
+def test_outbound_includes_traceparent():
+    from app.clients.http_utils import outbound_headers
+
+    headers = outbound_headers("11111111-1111-1111-1111-111111111111")
+    assert headers["X-Trace-Id"].startswith("11111111")
+    assert headers["traceparent"].startswith("00-11111111111111111111111111111111-")
     payload = {"data": [{"id": 2, "nombre": "Sofi"}], "traceId": "abc"}
     assert unwrap_entity(payload)["nombre"] == "Sofi"
 
