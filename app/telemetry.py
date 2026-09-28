@@ -49,8 +49,6 @@ def setup_telemetry(app: FastAPI) -> None:
     from opentelemetry import metrics, trace
     from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
     from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-    from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
     from opentelemetry.sdk.metrics import MeterProvider
     from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
     from opentelemetry.sdk.resources import Resource
@@ -83,5 +81,15 @@ def setup_telemetry(app: FastAPI) -> None:
     _requests = meter.create_counter("http.server.requests")
     _duration = meter.create_histogram("http.server.duration", unit="ms")
 
-    FastAPIInstrumentor.instrument_app(app)
-    HTTPXClientInstrumentor().instrument()
+    try:
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+        from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+
+        FastAPIInstrumentor.instrument_app(app)
+        HTTPXClientInstrumentor().instrument()
+    except Exception:
+        import logging
+
+        logging.getLogger("clic_kiusys").exception(
+            "OpenTelemetry no pudo instrumentar FastAPI; se exportan las metricas RED igual"
+        )
