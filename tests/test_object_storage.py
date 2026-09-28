@@ -49,3 +49,39 @@ def test_entidades_vuelos_v2(client):
 
     asientos = client.get("/api/v2/entidades/asientos-asignados")
     assert asientos.status_code == 200
+
+
+def test_random_y_get_by_id(client):
+    vuelo = client.post(
+        "/api/vuelos",
+        json={
+            "numero_vuelo": "RND1",
+            "origen": "BOG",
+            "destino": "MDE",
+            "fecha": "2026-09-28",
+            "aeronave": "A320",
+            "capacidad": 100,
+        },
+    ).json()
+    client.post(
+        "/api/pasajeros",
+        json={"nombre": "Random", "documento": "CCRND", "tipo": "adulto"},
+    )
+    assert client.get("/api/v2/entidades/vuelos/random").status_code == 200
+    assert client.get("/api/v2/entidades/pasajeros/random").status_code == 200
+
+    b = {"source": "api_b_animal_random", "configured": True, "entity": {"id": 2, "nombre": "Sofi"}}
+    c = {"source": "api_c_imagen_random", "configured": True, "entity": {"id": 1, "nombre": "imagen1"}}
+    from unittest.mock import patch
+
+    with (
+        patch("app.routes.v2.entidades.fetch_animal_random", return_value=b),
+        patch("app.routes.v2.entidades.fetch_imagen_random", return_value=c),
+    ):
+        response = client.get(f"/api/v2/entidades/vuelos/{vuelo['id']}", headers={"X-Trace-Id": "comp-1"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["vuelo"]["id"] == vuelo["id"]
+    assert body["api_b"]["entity"]["nombre"] == "Sofi"
+    assert body["api_c"]["entity"]["nombre"] == "imagen1"
+    assert body["trace_id"] == "comp-1"

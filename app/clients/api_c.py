@@ -8,6 +8,15 @@ def fetch_companion_entity_c(trace_id: str) -> dict[str, Any]:
     return fetch_imagen(trace_id)
 
 
+def fetch_imagen_random(trace_id: str) -> dict[str, Any]:
+    return fetch_remote_entity(
+        "api_c_imagen_random",
+        settings.api_c_base_url,
+        settings.api_c_imagen_random_path,
+        trace_id,
+    )
+
+
 def fetch_imagen(trace_id: str) -> dict[str, Any]:
     return fetch_remote_entity(
         "api_c_imagen",

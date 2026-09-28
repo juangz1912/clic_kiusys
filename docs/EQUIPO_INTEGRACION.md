@@ -23,9 +23,11 @@ Generar bloque listo para el chat:
 | GET | `/api/v2/health` | Health + metadata OCI |
 | POST | `/api/v2/flujo` | Tres vínculos locales + HTTP B/C; guarda JSON en Object Storage |
 | GET | `/api/v2/metrics` | Métricas RED v2 |
-| GET | `/api/v2/entidades/vuelos` | Consumir Vuelo desde B/C |
-| GET | `/api/v2/entidades/pasajeros` | Consumir Pasajero desde B/C |
-| GET | `/api/v2/entidades/asientos-asignados` | Consumir AsientoAsignado desde B/C |
+| GET | `/api/v2/entidades/vuelos/{id}` | Vuelo por id + animal random (Angel) + imagen random (Leonardo) |
+| GET | `/api/v2/entidades/vuelos/random` | Un vuelo al azar |
+| GET | `/api/v2/entidades/pasajeros/random` | Un pasajero al azar |
+| GET | `/api/v2/entidades/asientos-asignados/random` | Un asiento al azar |
+| GET | `/api/v2/entidades/vuelos` | Lista de vuelos |
 | GET | `/api/v2/storage/flujo/{trace_id}` | Snapshot del flujo |
 | POST | `/api/v2/storage/adjunto` | Subir adjunto (multipart + `X-Trace-Id`) |
 | GET | `/api/v2/storage/adjunto/{trace_id}/{filename}` | Descargar adjunto |
