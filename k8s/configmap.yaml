@@ -21,3 +21,6 @@ data:
   OCI_OS_NAMESPACE: "ax5bqkfrllcm"
   OCI_OS_BUCKET: "clic-kiusys-flow"
   OCI_OS_REGION: "sa-bogota-1"
+  OTEL_SERVICE_NAME: "clic-kiusys-api"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "https://otlp-gateway-prod-us-east-3.grafana.net/otlp"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"

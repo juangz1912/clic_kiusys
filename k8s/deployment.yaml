@@ -71,6 +71,12 @@ spec:
                   name: clic-kiusys-api-secret
                   key: OCI_OS_NAMESPACE
                   optional: true
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-otlp
+                  key: OTEL_EXPORTER_OTLP_HEADERS
+                  optional: true
           volumeMounts:
             - name: object-storage
               mountPath: /data/object-storage

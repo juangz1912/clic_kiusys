@@ -7,6 +7,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
+from app.telemetry import record_http_request
+
 _lock = Lock()
 _MAX_SAMPLES = 200
 _stats: dict[str, dict] = defaultdict(lambda: {"requests": 0, "errors": 0, "latency_ms_total": 0.0, "samples": []})
@@ -70,4 +72,5 @@ class V2MetricsMiddleware(BaseHTTPMiddleware):
             if response.status_code >= 500:
                 bucket["errors"] = int(bucket["errors"]) + 1
 
+        record_http_request(request.method, route_template(path), response.status_code, elapsed_ms)
         return response
