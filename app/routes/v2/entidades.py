@@ -60,6 +60,14 @@ def get_vuelo_con_companeros(vuelo_id: int, request: Request, db: Session = Depe
     return {
         "trace_id": trace_id,
         "vuelo": VueloRead.model_validate(vuelo).model_dump(mode="json"),
-        "api_b": CompanionPayload.model_validate(fetch_animal_random(trace_id)).model_dump(mode="json"),
-        "api_c": CompanionPayload.model_validate(fetch_imagen_random(trace_id)).model_dump(mode="json"),
+        "api_b": _companion(fetch_animal_random, trace_id),
+        "api_c": _companion(fetch_imagen_random, trace_id),
     }
+
+
+def _companion(fetch, trace_id: str) -> dict:
+    try:
+        raw = fetch(trace_id)
+    except Exception as exc:
+        raw = {"source": "companion", "configured": True, "entity": None, "error": str(exc)}
+    return CompanionPayload.model_validate(raw).model_dump(mode="json")
