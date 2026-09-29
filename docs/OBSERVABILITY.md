@@ -36,11 +36,9 @@ Cada API exporta OpenTelemetry al mismo stack con su propio nombre:
 | API C (GCP) | `api-c-documentos` |
 | Orquestador (GCP, Cloud Run) | `medical-orchestrator` |
 
-PRs con la integración: [Angel #1](https://github.com/AngelAvirama/Api_Pet_Adoption/pull/1) y [Leonardo #45](https://github.com/LeonardoG2005/MedicalDevops/pull/45). Cada uno debe crear el Secret `grafana-otlp` y redesplegar.
-
 Variables comunes: `OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp-gateway-prod-us-east-3.grafana.net/otlp`, `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf` y `OTEL_EXPORTER_OTLP_HEADERS` (se pasa por privado y va en un Secret). Deben usar las mismas métricas (`http.server.requests` y `http.server.duration` en ms, con `http.route` y `http.status_code`) para que el tablero las muestre sin cambios. Si reenvían `traceparent`, una traza cruza las tres nubes.
 
-Caché y cola: Angel publica `cache_hits_total` y `cache_misses_total` (Redis, el panel usa `max` porque cada pod reporta el mismo total) y el orquestador de Leonardo publica `queue_messages_pending` y `queue_messages_reprocessed_total` (Pub/Sub).
+Caché y cola: el tablero espera `cache_hits_total` y `cache_misses_total` de la caché Redis de Angel (el panel usa `max` porque cada pod reporta el mismo total de Redis) y `queue_messages_pending` y `queue_messages_reprocessed_total` del orquestador de Leonardo (Pub/Sub).
 
 ## OCI nativo
 
