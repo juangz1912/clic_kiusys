@@ -30,7 +30,7 @@
       "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
       "options": {
         "mode": "markdown",
-        "content": "Cada API del grupo exporta OpenTelemetry a este stack con su `service.name`: **clic-kiusys-api** (OCI/OKE, Juan), **api-b-adopcion** (AWS, Angel), **api-c-documentos** (GCP, Leonardo). Arriba se filtra por API. RED = Rate (peticiones/s), Errors (5xx) y Duration (p50/p95). Las trazas de abajo se abren para ver el recorrido por el `trace_id`."
+        "content": "Cada API del grupo exporta OpenTelemetry a este stack con su `service.name`: **clic-kiusys-api** (OCI/OKE, Juan), **api-b-adopcion** (AWS, Angel), **api-c-documentos** (GCP, Leonardo) y **medical-orchestrator** (Cloud Run, Leonardo). Arriba se filtra por API. RED = Rate (peticiones/s), Errors (5xx) y Duration (p50/p95). Las trazas de abajo se abren para ver el recorrido por el `trace_id`."
       }
     },
     {
@@ -202,19 +202,20 @@
     {
       "id": 11,
       "type": "timeseries",
-      "title": "Caché: aciertos y fallos (lo publica quien opere la caché)",
+      "title": "Caché Redis de api-b-adopcion: aciertos y fallos por segundo",
+      "description": "Los contadores viven en Redis y cada pod reporta el mismo total, por eso se usa max y no sum.",
       "gridPos": { "h": 7, "w": 12, "x": 0, "y": 44 },
       "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": { "defaults": { "unit": "ops", "noValue": "Sin datos: la caché aún no exporta métricas" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (service_name) (rate(cache_hits_total[5m]))", "legendFormat": "hits {{service_name}}" },
-        { "refId": "B", "expr": "sum by (service_name) (rate(cache_misses_total[5m]))", "legendFormat": "misses {{service_name}}" }
+        { "refId": "A", "expr": "max by (service_name) (rate(cache_hits_total[5m]))", "legendFormat": "hits {{service_name}}" },
+        { "refId": "B", "expr": "max by (service_name) (rate(cache_misses_total[5m]))", "legendFormat": "misses {{service_name}}" }
       ]
     },
     {
       "id": 12,
       "type": "timeseries",
-      "title": "Cola: pendientes y reprocesados (lo publica quien opere la cola)",
+      "title": "Cola Pub/Sub de medical-orchestrator: pendientes y reprocesados",
       "gridPos": { "h": 7, "w": 12, "x": 12, "y": 44 },
       "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": { "defaults": { "noValue": "Sin datos: la cola aún no exporta métricas" }, "overrides": [] },
