@@ -72,5 +72,6 @@ class V2MetricsMiddleware(BaseHTTPMiddleware):
             if response.status_code >= 500:
                 bucket["errors"] = int(bucket["errors"]) + 1
 
-        record_http_request(request.method, route_template(path), response.status_code, elapsed_ms)
+        route = getattr(request.scope.get("route"), "path", None) or "sin_ruta"
+        record_http_request(request.method, route, response.status_code, elapsed_ms)
         return response

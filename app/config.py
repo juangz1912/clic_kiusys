@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     integration_stub_when_unreachable: bool = False
 
     observability_saas_url: str = ""
+    demo_failure_enabled: bool = False
 
     object_storage_backend: str = "local"
     object_storage_local_dir: str = "./data/object-storage"

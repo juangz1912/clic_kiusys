@@ -135,3 +135,16 @@ def test_mensaje_agrega_api_a(client):
     listed = client.get("/api/v2/storage/flujo")
     assert listed.status_code == 200
     assert any(item["trace_id"] == "msg-1" for item in listed.json()["items"])
+
+
+def test_demo_fallo_apagado_por_defecto(client):
+    assert client.get("/api/v2/demo/fallo").status_code == 404
+
+
+def test_demo_fallo_responde_500_y_cuenta_error(client):
+    with patch("app.routes.v2.demo.settings.demo_failure_enabled", True):
+        response = client.get("/api/v2/demo/fallo", headers={"X-Trace-Id": "alerta-1"})
+    assert response.status_code == 500
+    assert "alerta-1" in response.json()["detail"]
+    stats = client.get("/api/v2/metrics").json()["endpoints"]["GET /api/v2/demo/fallo"]
+    assert stats["errors"] >= 1
