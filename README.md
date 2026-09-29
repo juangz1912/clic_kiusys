@@ -29,18 +29,77 @@ Servicios OCI usados: cluster OKE, registro OCIR, Load Balancer flexible (10 Mbp
 
 URL pública: http://157-137-193-66.sslip.io
 
-Caché y cola las llevan otros integrantes. El tablero SaaS del grupo se conecta después (`OTEL_EXPORTER_OTLP_ENDPOINT`).
+Juan también opera la capa de métricas del grupo en Grafana Cloud. Caché y cola las llevan otros integrantes.
 
 | Integrante | Nube | Rol |
 |------------|------|-----|
-| Juan Jose Giraldo | **Oracle OCI (OKE)** | API A + Object Storage |
+| Juan Jose Giraldo | **Oracle OCI (OKE)** | API A + Object Storage + métricas (Grafana Cloud) |
 | Angel Avirama | **AWS** | API B — adopción ([Api_Pet_Adoption](https://github.com/AngelAvirama/Api_Pet_Adoption)) |
 | Leonardo Giraldo | **GCP** | API C — documentos médicos ([MedicalDevops](https://github.com/LeonardoG2005/MedicalDevops)) |
 
-- **API v2:** `/api/v2/health`, `POST /api/v2/flujo` (vínculos Animal–Vuelo–Imagen, Adoptante–Pasajero–NotaMedica, Adopcion–AsientoAsignado–DocumentoGenerado), `/api/v2/metrics`
-- **Trace-id:** header `X-Trace-Id` en toda la cadena
+- **Contrato del grupo:** cada API expone un GET random por entidad y un GET por id que trae una entidad random de cada compañero. Aquí es `GET /api/v2/entidades/vuelos/{id}` (Vuelo + Animal de Angel + Imagen de Leonardo).
+- **Trace-id:** header `X-Trace-Id` y `traceparent` (W3C) en toda la cadena
 - Guía detallada: [docs/GUIA_SEGUIMIENTO_2.md](docs/GUIA_SEGUIMIENTO_2.md)
 - Integración del equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.md)
+- Observabilidad: [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md)
+
+## Links de sustentación
+
+**API A en OKE** (`http://157-137-193-66.sslip.io`)
+
+| Qué mostrar | Link |
+|-------------|------|
+| Swagger | http://157-137-193-66.sslip.io/docs |
+| Health (nube, cluster, trace_id) | http://157-137-193-66.sslip.io/api/v2/health |
+| Vuelo random | http://157-137-193-66.sslip.io/api/v2/entidades/vuelos/random |
+| Pasajero random | http://157-137-193-66.sslip.io/api/v2/entidades/pasajeros/random |
+| Asiento asignado random | http://157-137-193-66.sslip.io/api/v2/entidades/asientos-asignados/random |
+| Vuelo por id + Animal (AWS) + Imagen (GCP) | http://157-137-193-66.sslip.io/api/v2/entidades/vuelos/1 |
+| Métricas RED del pod (p50/p95) | http://157-137-193-66.sslip.io/api/v2/metrics |
+| Snapshots en Object Storage | http://157-137-193-66.sslip.io/api/v2/storage/flujo |
+| Fallo provocado (dispara la alerta) | http://157-137-193-66.sslip.io/api/v2/demo/fallo |
+
+**Observabilidad**
+
+| Qué mostrar | Link |
+|-------------|------|
+| Tablero RED del grupo (Grafana Cloud) | https://browngecko19.grafana.net/d/clic-s2-red/multicloud-s2-red-por-api |
+| Alerta "API A - errores 5xx" | https://browngecko19.grafana.net/alerting/list |
+| Trazas y métricas (Explore) | https://browngecko19.grafana.net/explore |
+| Alarma nativa OCI (CPU de nodos OKE) | https://cloud.oracle.com/monitoring/alarms?region=sa-bogota-1 |
+| OCI Logging (log group `clic-kiusys`) | https://cloud.oracle.com/logging/log-groups?region=sa-bogota-1 |
+| Cluster OKE | https://cloud.oracle.com/containers/clusters?region=sa-bogota-1 |
+| Bucket `clic-kiusys-flow` | https://cloud.oracle.com/object-storage/buckets/ax5bqkfrllcm/clic-kiusys-flow/objects?region=sa-bogota-1 |
+
+**Repositorio**
+
+| Qué mostrar | Link |
+|-------------|------|
+| Release v2.2.0 | https://github.com/juangz1912/clic_kiusys/releases/tag/v2.2.0 |
+| Pipelines | https://github.com/juangz1912/clic_kiusys/actions |
+
+**Compañeros**
+
+| API | Link |
+|-----|------|
+| API B Angel (AWS): animal random | http://aa11cf2e5dd814f8cbf7485099e3b46f-618055784.us-east-1.elb.amazonaws.com/api/v2/animals/random |
+| API B Angel (AWS): health | http://aa11cf2e5dd814f8cbf7485099e3b46f-618055784.us-east-1.elb.amazonaws.com/api/v2/health |
+| API C Leonardo (GCP): health | http://medical-documents-api-34-123-58-136.sslip.io/health |
+| API C Leonardo (GCP): documentación | http://medical-documents-api-34-123-58-136.sslip.io/documentation |
+| API C Leonardo (GCP): composición | http://medical-documents-api-34-123-58-136.sslip.io/api/v2/imagenes/1/composition |
+
+**Comandos de la demo**
+
+```bash
+# Trace-id de punta a punta
+curl -i -H "X-Trace-Id: sustentacion-1" http://157-137-193-66.sslip.io/api/v2/entidades/vuelos/1
+
+# Escalamiento: el HPA sube de 2 a 5 réplicas (y puede disparar la alarma de CPU de OCI)
+./scripts/k8s_hpa_demo.sh
+
+# Alerta: 30 respuestas 500 en 1 minuto, Grafana pasa a Firing y manda correo
+./scripts/demo_alerta.sh
+```
 
 ## Entidades (v1)
 
@@ -57,16 +116,21 @@ Estados de asiento: `seleccionado`, `asignado`, `expirado`.
 - CRUD v1: `/api/vuelos`, `/api/pasajeros`, `/api/asientos-asignados`
 - **QUERY:** `POST /api/vuelos/query`, etc.
 - Health v1: `/api/health`
-- **v2 multicloud:** `/api/v2/health`, `POST /api/v2/flujo`, `/api/v2/metrics`
+- **v2 multicloud:**
+  - `GET /api/v2/entidades/{vuelos|pasajeros|asientos-asignados}/random`
+  - `GET /api/v2/entidades/vuelos/{id}` con una entidad random de cada compañero
+  - `POST /api/v2/flujo` y `POST /api/v2/mensaje` (el mensaje queda en Object Storage)
+  - `GET /api/v2/storage/flujo`, `/api/v2/health`, `/api/v2/metrics`
+  - `GET /api/v2/demo/fallo` (solo con `DEMO_FAILURE_ENABLED=true`)
 - Docs: `/docs`
 
 ## Ambientes
 
 | Ambiente | URL cloud | API local | Base de datos |
 |----------|-----------|-----------|---------------|
-| Pruebas (Render) | https://clic-kiusys-pruebas.onrender.com | http://localhost:8001 | postgres puerto 5433 |
-| Producción (Render) | https://clic-kiusys-prod.onrender.com | http://localhost:8002 | postgres puerto 5434 |
-| OKE (OCI, sa-bogota-1) | http://157-137-193-66.sslip.io | — | Postgres en cluster (block volume OCI) |
+| **OKE (OCI, sa-bogota-1) — Seguimiento #2** | http://157-137-193-66.sslip.io | — | Postgres en cluster (block volume OCI) |
+| Pruebas (Render, legado S1) | https://clic-kiusys-pruebas.onrender.com | http://localhost:8001 | postgres puerto 5433 |
+| Producción (Render, legado S1) | https://clic-kiusys-prod.onrender.com | http://localhost:8002 | postgres puerto 5434 |
 
 ## Ejecución local
 
@@ -114,4 +178,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.1.0** (Seguimiento #2 en OKE).
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.2.0** (Seguimiento #2: OKE, contrato random, Grafana Cloud y alertas).
