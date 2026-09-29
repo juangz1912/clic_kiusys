@@ -12,7 +12,7 @@ data:
   API_B_ADOPTANTE_PATH: "/api/v2/adoptantes"
   API_B_ADOPCION_PATH: "/api/v2/adopciones"
   API_C_IMAGEN_PATH: "/imagenes"
-  API_C_IMAGEN_RANDOM_PATH: "/imagenes/random"
+  API_C_IMAGEN_RANDOM_PATH: "/api/v2/imagenes/random"
   API_C_NOTA_PATH: "/notas-medicas"
   API_C_DOCUMENTO_PATH: "/documentos-generados"
   INTEGRATION_STUB_WHEN_UNREACHABLE: "false"

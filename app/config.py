@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     api_b_adopcion_path: str = "/api/v2/adopciones"
     api_c_base_url: str = "http://medical-documents-api-34-123-58-136.sslip.io"
     api_c_imagen_path: str = "/imagenes"
-    api_c_imagen_random_path: str = "/imagenes/random"
+    api_c_imagen_random_path: str = "/api/v2/imagenes/random"
     api_c_nota_path: str = "/notas-medicas"
     api_c_documento_path: str = "/documentos-generados"
     integration_timeout_seconds: float = 10.0

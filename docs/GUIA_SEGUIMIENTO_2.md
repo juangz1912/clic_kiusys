@@ -74,7 +74,7 @@ Swagger: http://localhost:8001/docs → sección **v2**.
 ## Checklist sustentación
 
 - [x] Random por entidad y `GET /api/v2/entidades/vuelos/{id}` con Angel en vivo
-- [ ] Imagen random de Leonardo (falta que publique `/imagenes/random`)
+- [x] Imagen random de Leonardo (`/api/v2/imagenes/random`)
 - [x] 2+ réplicas en OKE y HPA 2 a 5 (`scripts/k8s_hpa_demo.sh`)
 - [x] Trace-id en respuesta, logs y trazas de Grafana
 - [x] Object Storage en bucket OCI `clic-kiusys-flow`
