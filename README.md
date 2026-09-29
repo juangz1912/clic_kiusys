@@ -75,7 +75,7 @@ Juan también opera la capa de métricas del grupo en Grafana Cloud. Caché y co
 
 | Qué mostrar | Link |
 |-------------|------|
-| Release v2.2.0 | https://github.com/juangz1912/clic_kiusys/releases/tag/v2.2.0 |
+| Release v2.2.1 | https://github.com/juangz1912/clic_kiusys/releases/tag/v2.2.1 |
 | Pipelines | https://github.com/juangz1912/clic_kiusys/actions |
 
 **Compañeros**
@@ -178,4 +178,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.2.0** (Seguimiento #2: OKE, contrato random, Grafana Cloud y alertas).
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.2.1** (Seguimiento #2: OKE, contrato random, Grafana Cloud y alertas).

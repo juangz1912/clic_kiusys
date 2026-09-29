@@ -81,6 +81,6 @@ Swagger: http://localhost:8001/docs → sección **v2**.
 - [x] Tablero RED (rate, errores, p50/p95) en Grafana Cloud
 - [x] Alerta que se dispara en vivo (`scripts/demo_alerta.sh`)
 - [x] Alarma nativa de OCI Monitoring
-- [x] Tag **v2.2.0** y release en GitHub
+- [x] Tag **v2.2.1** y release en GitHub
 - [ ] Angel y Leonardo exportando a Grafana con su `OTEL_SERVICE_NAME`
 - [ ] Caché y cola con métricas (dueños: compañeros)

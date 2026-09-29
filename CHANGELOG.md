@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.1 — 2026-09-28
+
+- Cada réplica envía sus métricas con `service.instance.id` (nombre del pod): corrige la tasa inflada y la alerta que no se resolvía
+- Pipeline `deploy-oke.yml` arreglado: corre tests, build, OCIR, rollout y smoke en cada push a `main`
+
 ## v2.2.0 — 2026-09-28
 
 - GET random por entidad: vuelos, pasajeros y asientos asignados
