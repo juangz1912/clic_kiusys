@@ -53,14 +53,10 @@ jobs:
           mkdir -p "$HOME/.oci"
           printf '%s\n' "$OCI_CLI_KEY" > "$HOME/.oci/ci_key.pem"
           chmod 600 "$HOME/.oci/ci_key.pem"
-          cat > "$HOME/.oci/config" << EOF
-[DEFAULT]
-user=$OCI_CLI_USER
-fingerprint=$OCI_CLI_FINGERPRINT
-tenancy=$OCI_CLI_TENANCY
-region=$OCI_REGION
-key_file=$HOME/.oci/ci_key.pem
-EOF
+          printf '[DEFAULT]\nuser=%s\nfingerprint=%s\ntenancy=%s\nregion=%s\nkey_file=%s\n' \
+            "$OCI_CLI_USER" "$OCI_CLI_FINGERPRINT" "$OCI_CLI_TENANCY" "$OCI_REGION" "$HOME/.oci/ci_key.pem" \
+            > "$HOME/.oci/config"
+          chmod 600 "$HOME/.oci/config"
           curl -sL https://dl.k8s.io/release/v1.32.2/bin/linux/amd64/kubectl -o /tmp/kubectl
           chmod +x /tmp/kubectl
           oci ce cluster create-kubeconfig --cluster-id "$OKE_CLUSTER_ID" --file "$HOME/.kube/config" --region "$OCI_REGION" --token-version 2.0.0 --kube-endpoint PUBLIC_ENDPOINT --auth api_key
