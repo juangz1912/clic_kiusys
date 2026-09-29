@@ -64,6 +64,7 @@ Juan también opera la capa de métricas del grupo en Grafana Cloud. Caché y co
 | Qué mostrar | Link |
 |-------------|------|
 | Tablero RED del grupo (Grafana Cloud) | https://browngecko19.grafana.net/d/clic-s2-red/multicloud-s2-red-por-api |
+| Tablero público (sin cuenta, solo lectura) | https://browngecko19.grafana.net/public-dashboards/36289f533814429484c024d748923642 |
 | Alerta "API A - errores 5xx" | https://browngecko19.grafana.net/alerting/list |
 | Trazas y métricas (Explore) | https://browngecko19.grafana.net/explore |
 | Alarma nativa OCI (CPU de nodos OKE) | https://cloud.oracle.com/monitoring/alarms?region=sa-bogota-1 |
