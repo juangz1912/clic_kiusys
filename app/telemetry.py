@@ -1,6 +1,7 @@
 """OpenTelemetry. Exporta trazas y métricas solo si OTEL_EXPORTER_OTLP_ENDPOINT está definido."""
 
 import os
+import socket
 from urllib.parse import unquote
 
 from fastapi import FastAPI
@@ -56,9 +57,13 @@ def setup_telemetry(app: FastAPI) -> None:
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
     headers = _otlp_headers()
+    pod = os.getenv("HOSTNAME") or socket.gethostname()
     resource = Resource.create(
         {
             "service.name": os.getenv("OTEL_SERVICE_NAME", "clic-kiusys-api"),
+            # Sin un id por réplica, los contadores de los pods se mezclan en una sola serie.
+            "service.instance.id": pod,
+            "k8s.pod.name": pod,
             "deployment.environment": os.getenv("ENVIRONMENT", "produccion"),
         }
     )
