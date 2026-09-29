@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.2.0 — 2026-09-28
+
+- GET random por entidad: vuelos, pasajeros y asientos asignados
+- `GET /api/v2/entidades/vuelos/{id}` con un Animal random de Angel (AWS) y una Imagen random de Leonardo (GCP); si un compañero falla, el vuelo igual responde
+- OpenTelemetry a Grafana Cloud: trazas y métricas RED con `service.name=clic-kiusys-api`, token solo en Secret
+- Tablero "Multicloud S2 - RED por API", canal de correo y alerta de errores 5xx versionados en `observability/grafana/`
+- `GET /api/v2/demo/fallo` y `scripts/demo_alerta.sh` para disparar la alerta en la sustentación
+- Alarma nativa de OCI Monitoring sobre CPU de los nodos de OKE (`scripts/oci/09_oci_alarm.sh`)
+- Links de sustentación en el README
+
 ## v2.1.0 — 2026-09-23
 
 - API en OKE (sa-bogota-1) con Load Balancer público
