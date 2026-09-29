@@ -1,0 +1,227 @@
+{
+  "uid": "clic-s2-red",
+  "title": "Multicloud S2 - RED por API",
+  "tags": ["seguimiento-2", "red", "multicloud"],
+  "timezone": "America/Bogota",
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "schemaVersion": 39,
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "label": "API",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+        "query": { "query": "label_values(http_server_requests_total, service_name)", "refId": "service" },
+        "definition": "label_values(http_server_requests_total, service_name)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "current": { "selected": true, "text": ["All"], "value": ["$__all"] }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "Cómo leer este tablero",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "Cada API del grupo exporta OpenTelemetry a este stack con su `service.name`: **clic-kiusys-api** (OCI/OKE, Juan), **api-b-adopcion** (AWS, Angel), **api-c-documentos** (GCP, Leonardo). Arriba se filtra por API. RED = Rate (peticiones/s), Errors (5xx) y Duration (p50/p95). Las trazas de abajo se abren para ver el recorrido por el `trace_id`."
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Peticiones/s",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2 }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m]))",
+          "legendFormat": "{{service_name}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "% errores 5xx",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 5 } ] }
+        },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"5..\"}[5m])) or sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m])) * 0) / sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m]))",
+          "legendFormat": "{{service_name}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Latencia p50",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.50, sum by (le, service_name) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m])))",
+          "legendFormat": "{{service_name}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Latencia p95",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1,
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 500 }, { "color": "red", "value": 1500 } ] }
+        },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, service_name) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m])))",
+          "legendFormat": "{{service_name}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Rate: peticiones/s por endpoint api/v2",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (service_name, http_method, http_route) (rate(http_server_requests_total{service_name=~\"$service\"}[5m]))",
+          "legendFormat": "{{service_name}} {{http_method}} {{http_route}}"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Errors: respuestas 5xx/s por endpoint",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "fixed", "fixedColor": "red" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["max"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (service_name, http_route, http_status_code) (rate(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"5..\"}[5m]))",
+          "legendFormat": "{{service_name}} {{http_route}} {{http_status_code}}"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Duration: latencia p50 y p95 por endpoint",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 17 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.50, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m])))",
+          "legendFormat": "p50 {{service_name}} {{http_route}}"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m])))",
+          "legendFormat": "p95 {{service_name}} {{http_route}}"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Resumen por endpoint (última hora)",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "options": { "showHeader": true },
+      "transformations": [
+        { "id": "merge", "options": {} },
+        { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "Value #A": "peticiones", "Value #B": "errores 5xx", "Value #C": "p50 ms", "Value #D": "p95 ms" } } }
+      ],
+      "targets": [
+        { "refId": "A", "format": "table", "instant": true, "expr": "round(sum by (service_name, http_route) (increase(http_server_requests_total{service_name=~\"$service\"}[1h])))" },
+        { "refId": "B", "format": "table", "instant": true, "expr": "round(sum by (service_name, http_route) (increase(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"5..\"}[1h])))" },
+        { "refId": "C", "format": "table", "instant": true, "expr": "histogram_quantile(0.50, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[1h])))" },
+        { "refId": "D", "format": "table", "instant": true, "expr": "histogram_quantile(0.95, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[1h])))" }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Trazas recientes (OpenTelemetry, Tempo)",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 35 },
+      "datasource": { "type": "tempo", "uid": "grafanacloud-traces" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "tempo", "uid": "grafanacloud-traces" },
+          "queryType": "traceql",
+          "query": "{resource.service.name=~\"$service\"}",
+          "limit": 20,
+          "tableType": "traces"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Caché: aciertos y fallos (lo publica quien opere la caché)",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 44 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": { "defaults": { "unit": "ops", "noValue": "Sin datos: la caché aún no exporta métricas" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (service_name) (rate(cache_hits_total[5m]))", "legendFormat": "hits {{service_name}}" },
+        { "refId": "B", "expr": "sum by (service_name) (rate(cache_misses_total[5m]))", "legendFormat": "misses {{service_name}}" }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Cola: pendientes y reprocesados (lo publica quien opere la cola)",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 44 },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "fieldConfig": { "defaults": { "noValue": "Sin datos: la cola aún no exporta métricas" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (service_name) (queue_messages_pending)", "legendFormat": "pendientes {{service_name}}" },
+        { "refId": "B", "expr": "sum by (service_name) (increase(queue_messages_reprocessed_total[5m]))", "legendFormat": "reprocesados {{service_name}}" }
+      ]
+    }
+  ]
+}

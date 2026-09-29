@@ -1,0 +1,10 @@
+{
+  "uid": "clic-s2-email",
+  "name": "clic-s2-email",
+  "type": "email",
+  "settings": {
+    "addresses": "jujosal007@gmail.com",
+    "singleEmail": true
+  },
+  "disableResolveMessage": false
+}

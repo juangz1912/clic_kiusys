@@ -1,0 +1,45 @@
+{
+  "uid": "clic-s2-errores-5xx",
+  "title": "API A - errores 5xx en api/v2",
+  "ruleGroup": "clic-s2",
+  "condition": "C",
+  "for": "30s",
+  "noDataState": "OK",
+  "execErrState": "Error",
+  "labels": { "severity": "critical", "equipo": "multicloud-s2" },
+  "annotations": {
+    "summary": "clic-kiusys-api (OCI/OKE) está respondiendo 5xx",
+    "description": "Hubo {{ $values.B.Value }} respuestas 5xx en los últimos 2 minutos. Revisar el tablero Multicloud S2 y buscar el trace_id en los logs del pod.",
+    "runbook_url": "https://github.com/juangz1912/clic_kiusys#links-de-sustentación"
+  },
+  "notification_settings": { "receiver": "clic-s2-email" },
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "grafanacloud-prom",
+      "relativeTimeRange": { "from": 300, "to": 0 },
+      "model": {
+        "refId": "A",
+        "expr": "sum(increase(http_server_requests_total{service_name=\"clic-kiusys-api\", http_status_code=~\"5..\"}[2m])) or vector(0)",
+        "instant": true,
+        "intervalMs": 1000,
+        "maxDataPoints": 43200
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "__expr__",
+      "model": { "refId": "B", "type": "reduce", "expression": "A", "reducer": "last" }
+    },
+    {
+      "refId": "C",
+      "datasourceUid": "__expr__",
+      "model": {
+        "refId": "C",
+        "type": "threshold",
+        "expression": "B",
+        "conditions": [ { "evaluator": { "type": "gt", "params": [0] } } ]
+      }
+    }
+  ]
+}
