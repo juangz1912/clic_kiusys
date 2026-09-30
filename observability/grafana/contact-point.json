@@ -3,7 +3,7 @@
   "name": "clic-s2-email",
   "type": "email",
   "settings": {
-    "addresses": "jujosal007@gmail.com",
+    "addresses": "jujosal007@gmail.com;aviramadeoroangel@gmail.com;leosowilo2005@gmail.com",
     "singleEmail": true
   },
   "disableResolveMessage": false
