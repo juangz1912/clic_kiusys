@@ -1,228 +1,1079 @@
 {
   "uid": "clic-s2-red",
   "title": "Multicloud S2 - RED por API",
-  "tags": ["seguimiento-2", "red", "multicloud"],
+  "tags": [
+    "seguimiento-2",
+    "red",
+    "multicloud"
+  ],
   "timezone": "America/Bogota",
   "refresh": "30s",
-  "time": { "from": "now-1h", "to": "now" },
-  "schemaVersion": 39,
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "schemaVersion": 42,
   "templating": {
     "list": [
       {
-        "name": "service",
-        "label": "API",
-        "type": "query",
-        "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-        "query": { "query": "label_values(http_server_requests_total, service_name)", "refId": "service" },
-        "definition": "label_values(http_server_requests_total, service_name)",
-        "refresh": 2,
-        "multi": true,
+        "allowCustomValue": true,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "grafanacloud-prom"
+        },
+        "definition": "label_values({__name__=~\"http_server_requests_total|http_server_request_duration_seconds_count\"}, service_name)",
+        "hide": 0,
         "includeAll": true,
-        "current": { "selected": true, "text": ["All"], "value": ["$__all"] }
+        "label": "API",
+        "multi": true,
+        "name": "service",
+        "options": [],
+        "query": {
+          "qryType": 5,
+          "query": "label_values({__name__=~\"http_server_requests_total|http_server_request_duration_seconds_count\"}, service_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },
   "panels": [
     {
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
       "id": 1,
-      "type": "text",
-      "title": "Cómo leer este tablero",
-      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
       "options": {
-        "mode": "markdown",
-        "content": "Cada API del grupo exporta OpenTelemetry a este stack con su `service.name`: **clic-kiusys-api** (OCI/OKE, Juan), **api-b-adopcion** (AWS, Angel), **api-c-documentos** (GCP, Leonardo) y **medical-orchestrator** (Cloud Run, Leonardo). Arriba se filtra por API. RED = Rate (peticiones/s), Errors (5xx) y Duration (p50/p95). Las trazas de abajo se abren para ver el recorrido por el `trace_id`."
-      }
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "Cada API del grupo exporta OpenTelemetry a este stack con su `service.name`: **clic-kiusys-api** (OCI/OKE, Juan), **api-b-adopcion** (AWS, Angel), **api-c-documentos** (GCP, Leonardo) y **medical-orchestrator** (Cloud Run, Leonardo). Arriba se filtra por API. RED = Rate (peticiones/s), Errors (5xx) y Duration (p50/p95). Las trazas de abajo se abren para ver el recorrido por el `trace_id`.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "13.3.0-36108471898",
+      "targets": [],
+      "title": "Cómo leer este tablero",
+      "type": "text"
     },
     {
-      "id": 2,
-      "type": "stat",
-      "title": "Peticiones/s",
-      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-      "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2 }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m]))",
-          "legendFormat": "{{service_name}}"
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "type": "stat",
-      "title": "% errores 5xx",
-      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "decimals": 2,
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 5 } ] }
-        },
-        "overrides": []
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        }
       },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.3.0-36108471898",
       "targets": [
         {
-          "refId": "A",
-          "expr": "100 * (sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"5..\"}[5m])) or sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m])) * 0) / sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m]))",
-          "legendFormat": "{{service_name}}"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m])) or sum by (service_name) (rate(http_server_request_duration_seconds_count{service_name=~\"$service\"}[5m]))",
+          "legendFormat": "{{service_name}}",
+          "range": true,
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Peticiones/s",
+      "type": "stat"
     },
     {
-      "id": 4,
-      "type": "stat",
-      "title": "Latencia p50",
-      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "histogram_quantile(0.50, sum by (le, service_name) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m])))",
-          "legendFormat": "{{service_name}}"
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "type": "stat",
-      "title": "Latencia p95",
-      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "ms",
-          "decimals": 1,
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 500 }, { "color": "red", "value": 1500 } ] }
-        },
-        "overrides": []
+          "decimals": 2,
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "percent"
+        }
       },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.3.0-36108471898",
       "targets": [
         {
-          "refId": "A",
-          "expr": "histogram_quantile(0.95, sum by (le, service_name) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m])))",
-          "legendFormat": "{{service_name}}"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "100 * (sum by (service_name) (rate(http_server_request_duration_seconds_count{service_name=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or sum by (service_name) (rate(http_server_request_duration_seconds_count{service_name=~\"$service\"}[5m])) * 0) / sum by (service_name) (rate(http_server_request_duration_seconds_count{service_name=~\"$service\"}[5m])) or (100 * (sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"5..\"}[5m])) or sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m])) * 0) / sum by (service_name) (rate(http_server_requests_total{service_name=~\"$service\"}[5m])))",
+          "legendFormat": "{{service_name}}",
+          "range": true,
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "% errores 5xx",
+      "type": "stat"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.3.0-36108471898",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum by (le, service_name) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m]))) or 1000 * histogram_quantile(0.50, sum by (le, service_name) (rate(http_server_request_duration_seconds_bucket{service_name=~\"$service\"}[5m])))",
+          "legendFormat": "{{service_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Latencia p50",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 500
+              },
+              {
+                "color": "red",
+                "value": 1500
+              }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.3.0-36108471898",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, service_name) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m]))) or 1000 * histogram_quantile(0.95, sum by (le, service_name) (rate(http_server_request_duration_seconds_bucket{service_name=~\"$service\"}[5m])))",
+          "legendFormat": "{{service_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Latencia p95",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
       "id": 6,
-      "type": "timeseries",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.3.0-36108471898",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "sum by (service_name, http_method, http_route) (rate(http_server_requests_total{service_name=~\"$service\"}[5m])) or sum by (service_name, http_method, http_route) (label_replace(rate(http_server_request_duration_seconds_count{service_name=~\"$service\"}[5m]), \"http_method\", \"$1\", \"http_request_method\", \"(.*)\"))",
+          "legendFormat": "{{service_name}} {{http_method}} {{http_route}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
       "title": "Rate: peticiones/s por endpoint api/v2",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] } },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum by (service_name, http_method, http_route) (rate(http_server_requests_total{service_name=~\"$service\"}[5m]))",
-          "legendFormat": "{{service_name}} {{http_method}} {{http_route}}"
-        }
-      ]
+      "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
       "id": 7,
-      "type": "timeseries",
-      "title": "Errors: respuestas 5xx/s por endpoint",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "fixed", "fixedColor": "red" } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["max"] } },
+      "options": {
+        "legend": {
+          "calcs": [
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.3.0-36108471898",
       "targets": [
         {
-          "refId": "A",
-          "expr": "sum by (service_name, http_route, http_status_code) (rate(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"5..\"}[5m]))",
-          "legendFormat": "{{service_name}} {{http_route}} {{http_status_code}}"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "sum by (http_route, service_name) (rate(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"4..|5..\"}[5m])) or sum by (http_route, service_name) (rate(http_server_request_duration_seconds_count{service_name=~\"$service\", http_response_status_code=~\"4..|5..\"}[5m]))",
+          "legendFormat": "{{service_name}} {{http_route}} {{http_status_code}}",
+          "range": true,
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Errors: respuestas 4xx/5xx por endpoint",
+      "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
       "id": 8,
-      "type": "timeseries",
-      "title": "Duration: latencia p50 y p95 por endpoint",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 17 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] } },
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.3.0-36108471898",
       "targets": [
         {
-          "refId": "A",
-          "expr": "histogram_quantile(0.50, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m])))",
-          "legendFormat": "p50 {{service_name}} {{http_route}}"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m]))) or 1000 * histogram_quantile(0.50, sum by (le, service_name, http_route) (rate(http_server_request_duration_seconds_bucket{service_name=~\"$service\"}[5m])))",
+          "legendFormat": "p50 {{service_name}} {{http_route}}",
+          "range": true,
+          "refId": "A"
         },
         {
-          "refId": "B",
-          "expr": "histogram_quantile(0.95, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m])))",
-          "legendFormat": "p95 {{service_name}} {{http_route}}"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[5m]))) or 1000 * histogram_quantile(0.95, sum by (le, service_name, http_route) (rate(http_server_request_duration_seconds_bucket{service_name=~\"$service\"}[5m])))",
+          "legendFormat": "p95 {{service_name}} {{http_route}}",
+          "range": true,
+          "refId": "B"
         }
-      ]
-    },
-    {
-      "id": 9,
-      "type": "table",
-      "title": "Resumen por endpoint (última hora)",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 26 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-      "options": { "showHeader": true },
-      "transformations": [
-        { "id": "merge", "options": {} },
-        { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "Value #A": "peticiones", "Value #B": "errores 5xx", "Value #C": "p50 ms", "Value #D": "p95 ms" } } }
       ],
-      "targets": [
-        { "refId": "A", "format": "table", "instant": true, "expr": "round(sum by (service_name, http_route) (increase(http_server_requests_total{service_name=~\"$service\"}[1h])))" },
-        { "refId": "B", "format": "table", "instant": true, "expr": "round(sum by (service_name, http_route) (increase(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"5..\"}[1h])))" },
-        { "refId": "C", "format": "table", "instant": true, "expr": "histogram_quantile(0.50, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[1h])))" },
-        { "refId": "D", "format": "table", "instant": true, "expr": "histogram_quantile(0.95, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[1h])))" }
-      ]
+      "title": "Duration: latencia p50 y p95 por endpoint",
+      "type": "timeseries"
     },
     {
-      "id": 10,
-      "type": "table",
-      "title": "Trazas recientes (OpenTelemetry, Tempo)",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 35 },
-      "datasource": { "type": "tempo", "uid": "grafanacloud-traces" },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 9,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "zebraStriping": false
+      },
+      "pluginVersion": "13.3.0-36108471898",
       "targets": [
         {
-          "refId": "A",
-          "datasource": { "type": "tempo", "uid": "grafanacloud-traces" },
-          "queryType": "traceql",
-          "query": "{resource.service.name=~\"$service\"}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "round(sum by (service_name, http_route) (increase(http_server_requests_total{service_name=~\"$service\"}[1h]))) or round(sum by (service_name, http_route) (increase(http_server_request_duration_seconds_count{service_name=~\"$service\"}[1h])))",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "round(sum by (service_name, http_route) (increase(http_server_requests_total{service_name=~\"$service\", http_status_code=~\"5..\"}[1h]))) or round(sum by (service_name, http_route) (increase(http_server_request_duration_seconds_count{service_name=~\"$service\", http_response_status_code=~\"5..\"}[1h])))",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[1h]))) or 1000 * histogram_quantile(0.50, sum by (le, service_name, http_route) (rate(http_server_request_duration_seconds_bucket{service_name=~\"$service\"}[1h])))",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, service_name, http_route) (rate(http_server_duration_milliseconds_bucket{service_name=~\"$service\", http_route!=\"\"}[1h]))) or 1000 * histogram_quantile(0.95, sum by (le, service_name, http_route) (rate(http_server_request_duration_seconds_bucket{service_name=~\"$service\"}[1h])))",
+          "format": "table",
+          "instant": true,
+          "refId": "D"
+        }
+      ],
+      "title": "Resumen por endpoint (última hora)",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #A": "peticiones",
+              "Value #B": "errores 5xx",
+              "Value #C": "p50 ms",
+              "Value #D": "p95 ms"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "grafanacloud-traces"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "zebraStriping": false
+      },
+      "pluginVersion": "13.3.0-36108471898",
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "grafanacloud-traces"
+          },
           "limit": 20,
+          "query": "{resource.service.name=~\"$service\"}",
+          "queryType": "traceql",
+          "refId": "A",
           "tableType": "traces"
         }
-      ]
+      ],
+      "title": "Trazas recientes (OpenTelemetry, Tempo)",
+      "type": "table"
     },
     {
-      "id": 11,
-      "type": "timeseries",
-      "title": "Caché Redis de api-b-adopcion: aciertos y fallos por segundo",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
       "description": "Los contadores viven en Redis y cada pod reporta el mismo total, por eso se usa max y no sum.",
-      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 44 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-      "fieldConfig": { "defaults": { "unit": "ops", "noValue": "Sin datos: la caché aún no exporta métricas" }, "overrides": [] },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "noValue": "Sin datos: la caché aún no exporta métricas",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "misses api-b-adopcion"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": true,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 44
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.3.0-36108471898",
       "targets": [
-        { "refId": "A", "expr": "max by (service_name) (rate(cache_hits_total[5m]))", "legendFormat": "hits {{service_name}}" },
-        { "refId": "B", "expr": "max by (service_name) (rate(cache_misses_total[5m]))", "legendFormat": "misses {{service_name}}" }
-      ]
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by (service_name) (cache_hits_total)",
+          "instant": false,
+          "legendFormat": "hits {{service_name}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "max by (service_name) (cache_misses_total)",
+          "legendFormat": "misses {{service_name}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Caché Redis de api-b-adopcion: aciertos y fallos acumulados",
+      "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "noValue": "Sin datos: la cola aún no exporta métricas",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 44
+      },
       "id": 12,
-      "type": "timeseries",
-      "title": "Cola Pub/Sub de medical-orchestrator: pendientes y reprocesados",
-      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 44 },
-      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
-      "fieldConfig": { "defaults": { "noValue": "Sin datos: la cola aún no exporta métricas" }, "overrides": [] },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.3.0-36108471898",
       "targets": [
-        { "refId": "A", "expr": "sum by (service_name) (queue_messages_pending)", "legendFormat": "pendientes {{service_name}}" },
-        { "refId": "B", "expr": "sum by (service_name) (increase(queue_messages_reprocessed_total[5m]))", "legendFormat": "reprocesados {{service_name}}" }
-      ]
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "sum by (service_name) (orchestrator_queue_messages_pending) or sum by (service_name) (queue_messages_pending)",
+          "legendFormat": "pendientes {{service_name}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "sum by (service_name) (increase(orchestrator_queue_messages_reprocessed_total[5m])) or sum by (service_name) (increase(queue_messages_reprocessed_total[5m]))",
+          "legendFormat": "reprocesados {{service_name}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Cola Pub/Sub de medical-orchestrator: pendientes y reprocesados",
+      "type": "timeseries"
     }
   ]
 }

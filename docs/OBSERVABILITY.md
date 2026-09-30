@@ -36,7 +36,7 @@ Cada API exporta OpenTelemetry al mismo stack con su propio nombre:
 | API C (GCP) | `api-c-documentos` |
 | Orquestador (GCP, Cloud Run) | `medical-orchestrator` |
 
-Variables comunes: `OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp-gateway-prod-us-east-3.grafana.net/otlp`, `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf` y `OTEL_EXPORTER_OTLP_HEADERS` (se pasa por privado y va en un Secret). Deben usar las mismas métricas (`http.server.requests` y `http.server.duration` en ms, con `http.route` y `http.status_code`) para que el tablero las muestre sin cambios. Si reenvían `traceparent`, una traza cruza las tres nubes.
+Variables comunes: `OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp-gateway-prod-us-east-3.grafana.net/otlp`, `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf` y `OTEL_EXPORTER_OTLP_HEADERS` (se pasa por privado y va en un Secret). API A y API B emiten `http.server.requests` y `http.server.duration` (ms, con `http.route` y `http.status_code`). API C emite la métrica estándar de OpenTelemetry `http_server_request_duration_seconds` (con `http_response_status_code`); cada panel consulta la primera y, si no hay datos, la segunda. Como las tres reenvían `traceparent`, una traza cruza las tres nubes.
 
 ### Logs de las tres nubes por trace_id
 
@@ -53,7 +53,7 @@ Para reconstruir el recorrido de un mensaje:
 
 Salen las líneas de los tres proveedores ordenadas por tiempo. Desde un span en Tempo, "Logs for this span" hace la misma consulta.
 
-Caché y cola: el tablero espera `cache_hits_total` y `cache_misses_total` de la caché Redis de Angel (el panel usa `max` porque cada pod reporta el mismo total de Redis) y `queue_messages_pending` y `queue_messages_reprocessed_total` del orquestador de Leonardo (Pub/Sub).
+Caché y cola: el tablero muestra `cache_hits_total` y `cache_misses_total` de la caché Redis de Angel (el panel usa `max` porque cada pod reporta el mismo total de Redis; los aciertos aparecen después de pedir dos veces el mismo `/api/v2/animals/{id}`) y `orchestrator_queue_messages_pending` y `orchestrator_queue_messages_reprocessed_total` del orquestador de Leonardo (Pub/Sub).
 
 ## OCI nativo
 
