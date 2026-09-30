@@ -41,9 +41,11 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
-setup_telemetry(app)
 app.add_middleware(V2MetricsMiddleware)
 app.add_middleware(TraceIdMiddleware)
+# Va después de los middlewares para que el span de OTel los envuelva y el log de
+# cada petición salga con el trace_id de la traza.
+setup_telemetry(app)
 app.include_router(router, prefix="/api")
 app.include_router(router_v2, prefix="/api/v2")
 

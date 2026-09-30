@@ -1,6 +1,7 @@
 import logging
 import uuid
 
+from opentelemetry import trace
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
@@ -16,9 +17,12 @@ class TraceIdMiddleware(BaseHTTPMiddleware):
         request.state.trace_id = trace_id
         response = await call_next(request)
         response.headers[TRACE_HEADER] = trace_id
+        span_context = trace.get_current_span().get_span_context()
+        otel_trace_id = format(span_context.trace_id, "032x") if span_context.is_valid else "-"
         logger.info(
-            "request trace_id=%s method=%s path=%s status=%s",
+            "request trace_id=%s otel_trace_id=%s method=%s path=%s status=%s",
             trace_id,
+            otel_trace_id,
             request.method,
             request.url.path,
             response.status_code,

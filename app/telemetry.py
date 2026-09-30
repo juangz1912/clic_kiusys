@@ -1,5 +1,6 @@
-"""OpenTelemetry. Exporta trazas y métricas solo si OTEL_EXPORTER_OTLP_ENDPOINT está definido."""
+"""OpenTelemetry. Exporta trazas, métricas y logs solo si OTEL_EXPORTER_OTLP_ENDPOINT está definido."""
 
+import logging
 import os
 import socket
 from urllib.parse import unquote
@@ -48,8 +49,12 @@ def setup_telemetry(app: FastAPI) -> None:
         return
 
     from opentelemetry import metrics, trace
+    from opentelemetry._logs import set_logger_provider
+    from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
     from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
     from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+    from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
     from opentelemetry.sdk.metrics import MeterProvider
     from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
     from opentelemetry.sdk.resources import Resource
@@ -86,6 +91,17 @@ def setup_telemetry(app: FastAPI) -> None:
     _requests = meter.create_counter("http.server.requests")
     _duration = meter.create_histogram("http.server.duration", unit="ms")
 
+    logger_provider = LoggerProvider(resource=resource)
+    logger_provider.add_log_record_processor(
+        BatchLogRecordProcessor(
+            OTLPLogExporter(endpoint=_signal_url(endpoint, "logs"), headers=headers)
+        )
+    )
+    set_logger_provider(logger_provider)
+    logging.getLogger("clic_kiusys").addHandler(
+        LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+    )
+
     try:
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
         from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
@@ -93,8 +109,6 @@ def setup_telemetry(app: FastAPI) -> None:
         FastAPIInstrumentor.instrument_app(app)
         HTTPXClientInstrumentor().instrument()
     except Exception:
-        import logging
-
         logging.getLogger("clic_kiusys").exception(
             "OpenTelemetry no pudo instrumentar FastAPI; se exportan las metricas RED igual"
         )
