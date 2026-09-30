@@ -9,7 +9,7 @@ Sustentación: acordada con el grupo (el PDF original decía 16 de septiembre de
 |------------|------|----------------------|
 | Juan Jose Giraldo | **Oracle OCI** | API A en **OKE** (Vuelo, Pasajero, AsientoAsignado) + Object Storage |
 | Angel Avirama | **AWS** | API B adopción (`/api/v2/animals`, `/api/v2/adoptantes`, `/api/v2/adopciones`) |
-| Leonardo Giraldo | **GCP** | API C documentos (`/imagenes`, `/notas-medicas`, `/documentos-generados`) |
+| Leonardo Guevara | **GCP** | API C documentos (`/imagenes`, `/notas-medicas`, `/documentos-generados`) |
 
 Componentes transversales (1 por integrante, nube distinta): orquestador, caché, object storage.
 
@@ -79,8 +79,10 @@ Swagger: http://localhost:8001/docs → sección **v2**.
 - [x] Trace-id en respuesta, logs y trazas de Grafana
 - [x] Object Storage en bucket OCI `clic-kiusys-flow`
 - [x] Tablero RED (rate, errores, p50/p95) en Grafana Cloud
-- [x] Alerta que se dispara en vivo (`scripts/demo_alerta.sh`)
+- [x] Consumidor del Object Storage como artefacto propio (`storage_consumer/`, imagen, manifiesto y pipeline)
+- [x] Alerta que se dispara con un fallo en el paso api_a del flujo (`scripts/demo_fallo_flujo.sh`)
 - [x] Alarma nativa de OCI Monitoring
-- [x] Tag **v2.2.1** y release en GitHub
-- [ ] Angel y Leonardo exportando a Grafana con su `OTEL_SERVICE_NAME`
-- [ ] Caché y cola con métricas (dueños: compañeros)
+- [x] Logs de las tres nubes en Loki, correlacionados por trace_id
+- [x] Angel y Leonardo exportando a Grafana con su `OTEL_SERVICE_NAME`
+- [x] Caché y cola con métricas en el tablero
+- [x] Tag **v2.3.0** y release en GitHub

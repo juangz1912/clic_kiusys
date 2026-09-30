@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.3.0 — 2026-09-30
+
+- Consumidor del Object Storage (`storage_consumer/`): Deployment propio en OKE que genera `adjuntos/<trace_id>/resumen.md` por cada mensaje del flujo, con su imagen en OCIR y su pipeline `deploy-storage-consumer.yml`
+- `PUT /api/v2/demo/fallo-flujo` hace fallar el paso api_a (`POST /api/v2/mensaje`) del orquestador; `scripts/demo_fallo_flujo.sh` dispara la alerta con un fallo real del flujo
+- Logs a Grafana Loki por OTLP con el trace_id de la traza (`otel_trace_id` en cada línea)
+- Tablero sincronizado con las métricas de API C y del orquestador; la alerta avisa por correo a los tres integrantes
+- README con el diagrama completo del grupo, los componentes transversales y la justificación de los servicios adicionales
+
 ## v2.2.1 — 2026-09-28
 
 - Cada réplica envía sus métricas con `service.instance.id` (nombre del pod): corrige la tasa inflada y la alerta que no se resolvía

@@ -8,34 +8,68 @@ Repositorio: https://github.com/juangz1912/clic_kiusys
 
 ```mermaid
 flowchart LR
-  Orq[Orquestador Leonardo GCP]
-  ApiA[API A Juan OCI OKE]
-  ApiB[API B Angel AWS]
-  ApiC[API C Leonardo GCP]
-  Bucket[Object Storage Juan OCI]
-  Orq --> ApiA
-  ApiA --> ApiB
-  ApiA --> ApiC
-  ApiA --> Bucket
+  Cliente[Cliente / Postman] -->|"POST /api/v2/flujo + X-Trace-Id"| Orq
+
+  subgraph GCP["GCP - Leonardo Guevara"]
+    Orq[Orquestador<br/>Cloud Run]
+    PubSub[(Pub/Sub<br/>reintentos)]
+    ApiC[API C documentos<br/>GKE]
+  end
+
+  subgraph AWS["AWS - Angel Avirama"]
+    ApiB[API B adopción<br/>EKS]
+    Redis[(ElastiCache Redis<br/>caché con TTL)]
+  end
+
+  subgraph OCI["OCI - Juan José Giraldo"]
+    LB[Load Balancer<br/>157-137-193-66.sslip.io]
+    ApiA[API A PSS<br/>OKE 2-5 réplicas, HPA]
+    PG[(Postgres<br/>Block Volume)]
+    Bucket[(Object Storage<br/>clic-kiusys-flow)]
+    Consumer[Consumidor del bucket<br/>OKE]
+  end
+
+  Grafana[Grafana Cloud<br/>métricas, logs, trazas, alerta]
+
+  Orq <-->|mensaje| PubSub
+  Orq -->|"1. GET imagen"| ApiC
+  Orq -->|"2. GET animal"| ApiB
+  Orq -->|"3. GET vuelo, 4. POST /api/v2/mensaje"| LB --> ApiA
+  ApiA --> PG
+  ApiA -->|"flujo/trace_id.json"| Bucket
+  Bucket --> Consumer -->|"adjuntos/trace_id/resumen.md"| Bucket
+  ApiA -.->|entidades en tiempo real| ApiB
+  ApiA -.-> ApiC
+  ApiB --> Redis
+  ApiB -.-> ApiA
+  ApiB -.-> ApiC
+  ApiC -.-> ApiA
+  ApiC -.-> ApiB
+  ApiA -. OTLP .-> Grafana
+  ApiB -. OTLP .-> Grafana
+  ApiC -. OTLP .-> Grafana
+  Orq -. OTLP .-> Grafana
 ```
 
-| Integrante | Nube | Pieza |
-|------------|------|--------|
-| Juan José Giraldo | Oracle OCI | API A en OKE + Object Storage |
-| Angel Avirama | AWS | API B adopción |
-| Leonardo Giraldo | GCP | API C documentos + orquestador |
+| Integrante | Nube | API | Componente transversal |
+|------------|------|-----|------------------------|
+| Juan José Giraldo | **Oracle OCI** (OKE) | API A: Vuelo, Pasajero, AsientoAsignado (este repo) | Object Storage + consumidor ([storage_consumer](storage_consumer/README.md)) y capa SaaS de observabilidad (Grafana Cloud) |
+| Angel Avirama | **AWS** (EKS) | API B: Animal, Adoptante, Adopción ([Api_Pet_Adoption](https://github.com/AngelAvirama/Api_Pet_Adoption)) | Caché Redis (ElastiCache) |
+| Leonardo Guevara | **GCP** (GKE + Cloud Run) | API C: Imagen, NotaMedica, DocumentoGenerado ([MedicalDevops](https://github.com/LeonardoG2005/MedicalDevops)) | Orquestador + cola Pub/Sub |
 
-Servicios OCI usados: cluster OKE, registro OCIR, Load Balancer flexible (10 Mbps), Block Volume para Postgres, VCN y Object Storage. El DNS `sslip.io` apunta a la IP del balanceador sin costo.
+URL pública de la API A: http://157-137-193-66.sslip.io
 
-URL pública: http://157-137-193-66.sslip.io
+### Servicios adicionales (OCI)
 
-Juan también opera la capa de métricas del grupo en Grafana Cloud. Caché y cola las llevan otros integrantes.
-
-| Integrante | Nube | Rol |
-|------------|------|-----|
-| Juan Jose Giraldo | **Oracle OCI (OKE)** | API A + Object Storage + métricas (Grafana Cloud) |
-| Angel Avirama | **AWS** | API B — adopción ([Api_Pet_Adoption](https://github.com/AngelAvirama/Api_Pet_Adoption)) |
-| Leonardo Giraldo | **GCP** | API C — documentos médicos ([MedicalDevops](https://github.com/LeonardoG2005/MedicalDevops)) |
+| Servicio | Para qué |
+|----------|----------|
+| Load Balancer flexible de OCI (Service `LoadBalancer`) | Punto de entrada único para los compañeros y el orquestador; reparte entre las réplicas y saca de rotación los pods que fallan la readiness probe. |
+| DNS con `sslip.io` | Nombre estable para la IP del balanceador sin comprar dominio; es el que tienen configurado Angel, Leonardo y el orquestador. |
+| OCI Container Registry (OCIR) | Registro privado en la misma región del cluster. Cada imagen lleva el SHA del commit, así un rollback apunta a una versión exacta. |
+| Gestión de secretos | Kubernetes Secrets para la base, las llaves S3 del bucket y el header OTLP de Grafana; GitHub Actions Secrets para las credenciales del pipeline. Nada de eso está en git. |
+| HPA + metrics-server | Escala la API de 2 a 5 réplicas por CPU (`scripts/k8s_hpa_demo.sh`). |
+| OCI Monitoring, Notifications y Logging | Alarma de CPU de los nodos con aviso por correo y log group `clic-kiusys` con los logs JSON de los pods. |
+| Block Volume | Disco persistente para Postgres dentro del cluster. |
 
 - **Contrato del grupo:** cada API expone un GET random por entidad y un GET por id que trae una entidad random de cada compañero. Aquí es `GET /api/v2/entidades/vuelos/{id}` (Vuelo + Animal de Angel + Imagen de Leonardo).
 - **Trace-id:** header `X-Trace-Id` y `traceparent` (W3C) en toda la cadena
@@ -57,7 +91,9 @@ Juan también opera la capa de métricas del grupo en Grafana Cloud. Caché y co
 | Vuelo por id + Animal (AWS) + Imagen (GCP) | http://157-137-193-66.sslip.io/api/v2/entidades/vuelos/1 |
 | Métricas RED del pod (p50/p95) | http://157-137-193-66.sslip.io/api/v2/metrics |
 | Snapshots en Object Storage | http://157-137-193-66.sslip.io/api/v2/storage/flujo |
-| Fallo provocado (dispara la alerta) | http://157-137-193-66.sslip.io/api/v2/demo/fallo |
+| Mensaje de un flujo del orquestador | http://157-137-193-66.sslip.io/api/v2/storage/flujo/revision-final-1 |
+| Adjunto generado por el consumidor | http://157-137-193-66.sslip.io/api/v2/storage/adjunto/revision-final-1/resumen.md |
+| Estado del fallo del paso api_a | http://157-137-193-66.sslip.io/api/v2/demo/fallo-flujo |
 
 **Observabilidad**
 
@@ -76,7 +112,7 @@ Juan también opera la capa de métricas del grupo en Grafana Cloud. Caché y co
 
 | Qué mostrar | Link |
 |-------------|------|
-| Release v2.2.1 | https://github.com/juangz1912/clic_kiusys/releases/tag/v2.2.1 |
+| Release v2.3.0 | https://github.com/juangz1912/clic_kiusys/releases/tag/v2.3.0 |
 | Pipelines | https://github.com/juangz1912/clic_kiusys/actions |
 
 **Compañeros**
@@ -92,14 +128,22 @@ Juan también opera la capa de métricas del grupo en Grafana Cloud. Caché y co
 **Comandos de la demo**
 
 ```bash
-# Trace-id de punta a punta
-curl -i -H "X-Trace-Id: sustentacion-1" http://157-137-193-66.sslip.io/api/v2/entidades/vuelos/1
+# Flujo completo: orquestador (GCP) -> Pub/Sub -> API C (GCP) -> API B (AWS) -> API A (OCI) -> Object Storage
+curl -X POST -H "Content-Type: application/json" -H "X-Trace-Id: sustentacion-1" \
+  -d '{"resource":"imagen","id":1}' https://medical-orchestrator-400345348270.us-central1.run.app/api/v2/flujo
+curl http://157-137-193-66.sslip.io/api/v2/storage/flujo/sustentacion-1
+curl http://157-137-193-66.sslip.io/api/v2/storage/adjunto/sustentacion-1/resumen.md
+
+# Modificar un dato en tiempo real y verlo en el siguiente mensaje
+curl -X PUT -H "Content-Type: application/json" -d '{"destino":"CTG"}' http://157-137-193-66.sslip.io/api/vuelos/1
 
 # Escalamiento: el HPA sube de 2 a 5 réplicas (y puede disparar la alarma de CPU de OCI)
 ./scripts/k8s_hpa_demo.sh
 
-# Alerta: 30 respuestas 500 en 1 minuto, Grafana pasa a Firing y manda correo
-./scripts/demo_alerta.sh
+# Alerta por un fallo en un paso del flujo: el paso api_a responde 500, Pub/Sub reintenta,
+# la alerta pasa a Firing y llega el correo. Al desactivar, el reintento pasa y la alerta se resuelve.
+./scripts/demo_fallo_flujo.sh activar
+./scripts/demo_fallo_flujo.sh desactivar
 ```
 
 ## Entidades (v1)
@@ -121,8 +165,9 @@ Estados de asiento: `seleccionado`, `asignado`, `expirado`.
   - `GET /api/v2/entidades/{vuelos|pasajeros|asientos-asignados}/random`
   - `GET /api/v2/entidades/vuelos/{id}` con una entidad random de cada compañero
   - `POST /api/v2/flujo` y `POST /api/v2/mensaje` (el mensaje queda en Object Storage)
-  - `GET /api/v2/storage/flujo`, `/api/v2/health`, `/api/v2/metrics`
-  - `GET /api/v2/demo/fallo` (solo con `DEMO_FAILURE_ENABLED=true`)
+  - `GET /api/v2/storage/flujo`, `/api/v2/storage/flujo/{trace_id}`, `/api/v2/storage/adjunto/{trace_id}/{archivo}`
+  - `/api/v2/health`, `/api/v2/metrics`
+  - `GET|PUT /api/v2/demo/fallo-flujo` y `GET /api/v2/demo/fallo` (solo con `DEMO_FAILURE_ENABLED=true`)
 - Docs: `/docs`
 
 ## Ambientes
@@ -167,6 +212,7 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 ## Pipelines
 
 - `deploy-oke.yml` — en `main`: tests, imagen amd64 a OCIR y rollout en OKE
+- `deploy-storage-consumer.yml` — en `main` cuando cambia `storage_consumer/`: tests, imagen a OCIR y rollout del consumidor
 - `deploy-render.yml` — hook de Render en `develop` (pruebas) y `main` (producción)
 
 ## Stack
@@ -179,4 +225,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.2.1** (Seguimiento #2: OKE, contrato random, Grafana Cloud y alertas).
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.3.0** (Seguimiento #2: logs en Loki, consumidor del Object Storage y alerta por fallo en un paso del flujo).

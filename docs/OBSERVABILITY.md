@@ -64,9 +64,13 @@ Caché y cola: el tablero muestra `cache_hits_total` y `cache_misses_total` de l
 kubectl -n clic-kiusys logs -l app=clic-kiusys-api --since=10m | grep sustentacion-1
 ```
 
-## Demo de alerta
+## Demo de alerta: fallo en un paso del flujo
 
-1. `./scripts/demo_alerta.sh` hace 30 llamadas a `/api/v2/demo/fallo` (una cada 2 s), cada una con su trace_id.
-2. En 1 a 2 minutos la alerta pasa de Normal a Pending y luego a Firing, y llega el correo.
-3. En el tablero se ve el pico en "Errors" y en "% errores 5xx".
-4. Al dejar de provocar fallos, la alerta vuelve a Normal y llega el correo de resuelta.
+El paso de la API A dentro del flujo es `POST /api/v2/mensaje`, que llama el orquestador de GCP después de consultar las tres APIs. `PUT /api/v2/demo/fallo-flujo {"activo": true}` hace que ese paso responda 500. El interruptor se guarda en Postgres, así que todas las réplicas lo ven al instante y no hay que reiniciar pods.
+
+1. `./scripts/demo_fallo_flujo.sh activar` prende el fallo y dispara 3 flujos en el orquestador.
+2. El orquestador falla en el paso api_a y Pub/Sub reentrega el mensaje: sube el panel "Cola" (reprocesados) y aparecen los 5xx de `POST /api/v2/mensaje` en "Errors".
+3. En 1 a 2 minutos la alerta **API A - errores 5xx en api/v2** pasa de Normal a Pending y luego a Firing, y llega el correo a los tres integrantes.
+4. `./scripts/demo_fallo_flujo.sh desactivar` apaga el fallo. En el siguiente reintento el flujo termina, el mensaje queda en el bucket (el script imprime los links) y el consumidor genera su `resumen.md`. La alerta vuelve a Normal y llega el correo de resuelta.
+
+`./scripts/demo_alerta.sh` sigue disponible como plan B: provoca 500 en `/api/v2/demo/fallo` sin pasar por el orquestador.

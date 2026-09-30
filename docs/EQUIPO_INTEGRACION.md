@@ -51,7 +51,7 @@ Generar bloque listo para el chat:
 | Health | `GET /api/v2/health` |
 | Listas v2 | `/api/v2/animals`, `/api/v2/adoptantes`, `/api/v2/adopciones` |
 
-## Integrante C — Leonardo Giraldo (GCP)
+## Integrante C — Leonardo Guevara (GCP)
 
 | Campo | Valor |
 |-------|--------|
