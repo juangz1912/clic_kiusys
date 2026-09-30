@@ -9,7 +9,7 @@
   "labels": { "severity": "critical", "equipo": "multicloud-s2" },
   "annotations": {
     "summary": "clic-kiusys-api (OCI/OKE) está respondiendo 5xx",
-    "description": "Hubo {{ $values.B.Value }} respuestas 5xx en los últimos 2 minutos. Revisar el tablero Multicloud S2 y buscar el trace_id en los logs del pod.",
+    "description": "Hubo {{ $values.B.Value }} respuestas 5xx en los últimos 2 minutos. Si vienen de POST /api/v2/mensaje, falló el paso api_a del flujo del orquestador y Pub/Sub lo está reintentando. Revisar el tablero Multicloud S2 y buscar el trace_id en Loki.",
     "runbook_url": "https://github.com/juangz1912/clic_kiusys#links-de-sustentación"
   },
   "notification_settings": { "receiver": "clic-s2-email" },

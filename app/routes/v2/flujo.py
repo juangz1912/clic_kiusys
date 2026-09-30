@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas_v2 import FlujoV2Request, FlujoV2Response, MensajeV2Request, MensajeV2Response
+from app.services.demo_flags import FALLO_MENSAJE, flag_activo
 from app.services.v2_flow_service import append_api_a, build_flujo_v2
 
 router = APIRouter()
@@ -26,4 +27,9 @@ def post_mensaje_v2(
 ):
     """Contrato para el orquestador: agrega Vuelo, Pasajero y AsientoAsignado al mensaje."""
     trace_id = getattr(request.state, "trace_id", "unknown")
+    if flag_activo(db, FALLO_MENSAJE):
+        raise HTTPException(
+            status_code=500,
+            detail=f"Fallo provocado en el paso api_a del flujo (trace_id={trace_id})",
+        )
     return append_api_a(db, payload, trace_id)

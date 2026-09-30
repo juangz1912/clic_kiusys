@@ -148,3 +148,31 @@ def test_demo_fallo_responde_500_y_cuenta_error(client):
     assert "alerta-1" in response.json()["detail"]
     stats = client.get("/api/v2/metrics").json()["endpoints"]["GET /api/v2/demo/fallo"]
     assert stats["errors"] >= 1
+
+
+def test_fallo_flujo_apagado_por_defecto(client):
+    assert client.put("/api/v2/demo/fallo-flujo", json={"activo": True}).status_code == 404
+
+
+def test_fallo_flujo_hace_fallar_el_paso_mensaje(client):
+    vuelo = client.post(
+        "/api/vuelos",
+        json={
+            "numero_vuelo": "FLF1",
+            "origen": "BOG",
+            "destino": "MDE",
+            "fecha": "2026-09-23",
+            "aeronave": "A320",
+            "capacidad": 180,
+        },
+    ).json()
+    body = {"mensaje": {"origen": "orquestador"}, "vuelo_id": vuelo["id"]}
+    with patch("app.routes.v2.demo.settings.demo_failure_enabled", True):
+        assert client.put("/api/v2/demo/fallo-flujo", json={"activo": True}).json() == {"activo": True}
+        fallo = client.post("/api/v2/mensaje", json=body, headers={"X-Trace-Id": "flujo-falla-1"})
+        assert fallo.status_code == 500
+        assert "flujo-falla-1" in fallo.json()["detail"]
+
+        assert client.put("/api/v2/demo/fallo-flujo", json={"activo": False}).json() == {"activo": False}
+        assert client.get("/api/v2/demo/fallo-flujo").json() == {"activo": False}
+        assert client.post("/api/v2/mensaje", json=body).status_code == 200
