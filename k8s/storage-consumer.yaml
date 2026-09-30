@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clic-kiusys-storage-consumer
+  namespace: clic-kiusys
+  labels:
+    app: clic-kiusys-storage-consumer
+spec:
+  # Una sola réplica: dos consumidores generarían el mismo resumen a la vez.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clic-kiusys-storage-consumer
+  template:
+    metadata:
+      labels:
+        app: clic-kiusys-storage-consumer
+    spec:
+      imagePullSecrets:
+        - name: ocir-secret
+      containers:
+        - name: consumer
+          image: sa-bogota-1.ocir.io/ax5bqkfrllcm/clic-kiusys-storage-consumer:latest
+          env:
+            - name: POLL_SECONDS
+              value: "15"
+            - name: OCI_OS_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: clic-kiusys-api-config
+                  key: OCI_OS_BUCKET
+            - name: OCI_OS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: clic-kiusys-api-config
+                  key: OCI_OS_REGION
+            - name: OCI_OS_NAMESPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: clic-kiusys-api-config
+                  key: OCI_OS_NAMESPACE
+            - name: OCI_S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: clic-kiusys-api-secret
+                  key: OCI_S3_ACCESS_KEY_ID
+            - name: OCI_S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: clic-kiusys-api-secret
+                  key: OCI_S3_SECRET_ACCESS_KEY
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "test $(( $(date +%s) - $(stat -c %Y /tmp/consumer-heartbeat) )) -lt 120"]
+            initialDelaySeconds: 60
+            periodSeconds: 30

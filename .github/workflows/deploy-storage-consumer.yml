@@ -1,0 +1,70 @@
+name: Deploy storage consumer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "storage_consumer/**"
+      - "k8s/storage-consumer.yaml"
+      - ".github/workflows/deploy-storage-consumer.yml"
+  workflow_dispatch:
+
+env:
+  OCI_REGION: sa-bogota-1
+  OCIR_NAMESPACE: ax5bqkfrllcm
+
+jobs:
+  test-build-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: storage_consumer
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tests
+        run: |
+          pip install -r requirements.txt pytest==8.3.4
+          pytest -q
+
+      - name: Build and push OCIR
+        env:
+          OCIR_USERNAME: ${{ secrets.OCIR_USERNAME }}
+          OCIR_AUTH_TOKEN: ${{ secrets.OCIR_AUTH_TOKEN }}
+        run: |
+          echo "$OCIR_AUTH_TOKEN" | docker login ${OCI_REGION}.ocir.io -u "$OCIR_USERNAME" --password-stdin
+          IMAGE="${OCI_REGION}.ocir.io/${OCIR_NAMESPACE}/clic-kiusys-storage-consumer:${GITHUB_SHA::7}"
+          docker build --platform linux/amd64 -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Kubeconfig
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY: ${{ secrets.OCI_CLI_KEY }}
+          OKE_CLUSTER_ID: ${{ secrets.OKE_CLUSTER_ID }}
+        run: |
+          pip install oci-cli
+          mkdir -p "$HOME/.oci"
+          printf '%s\n' "$OCI_CLI_KEY" > "$HOME/.oci/ci_key.pem"
+          chmod 600 "$HOME/.oci/ci_key.pem"
+          printf '[DEFAULT]\nuser=%s\nfingerprint=%s\ntenancy=%s\nregion=%s\nkey_file=%s\n' \
+            "$OCI_CLI_USER" "$OCI_CLI_FINGERPRINT" "$OCI_CLI_TENANCY" "$OCI_REGION" "$HOME/.oci/ci_key.pem" \
+            > "$HOME/.oci/config"
+          chmod 600 "$HOME/.oci/config"
+          curl -sL https://dl.k8s.io/release/v1.32.2/bin/linux/amd64/kubectl -o /tmp/kubectl
+          chmod +x /tmp/kubectl
+          oci ce cluster create-kubeconfig --cluster-id "$OKE_CLUSTER_ID" --file "$HOME/.kube/config" --region "$OCI_REGION" --token-version 2.0.0 --kube-endpoint PUBLIC_ENDPOINT --auth api_key
+
+      - name: Rollout
+        working-directory: .
+        run: |
+          /tmp/kubectl apply -f k8s/storage-consumer.yaml
+          /tmp/kubectl -n clic-kiusys set image deployment/clic-kiusys-storage-consumer consumer="$IMAGE"
+          /tmp/kubectl -n clic-kiusys rollout status deployment/clic-kiusys-storage-consumer --timeout=180s
