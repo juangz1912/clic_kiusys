@@ -141,7 +141,7 @@ curl -X PUT -H "Content-Type: application/json" -d '{"destino":"CTG"}' http://15
 ./scripts/k8s_hpa_demo.sh
 
 # Alerta por un fallo en un paso del flujo: el paso api_a responde 500, Pub/Sub reintenta,
-# la alerta pasa a Firing y llega el correo. Al desactivar, el reintento pasa y la alerta se resuelve.
+# la alerta pasa a Firing y llega el correo. Al desactivar, se reprocesan los mensajes y la alerta se resuelve.
 ./scripts/demo_fallo_flujo.sh activar
 ./scripts/demo_fallo_flujo.sh desactivar
 ```

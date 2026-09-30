@@ -3,12 +3,12 @@
 #
 #   ./scripts/demo_fallo_flujo.sh activar     # el paso api_a (POST /api/v2/mensaje) empieza a responder 500
 #                                             # y se disparan FLOWS flujos por el orquestador de GCP
-#   ./scripts/demo_fallo_flujo.sh desactivar  # el paso vuelve a funcionar; Pub/Sub reentrega y el flujo termina
+#   ./scripts/demo_fallo_flujo.sh desactivar  # el paso vuelve a funcionar y se reprocesan los mensajes fallidos
 #   ./scripts/demo_fallo_flujo.sh estado
 #
-# Qué se ve: el orquestador falla en el paso api_a, Pub/Sub reintenta (panel "Cola" -> reprocesados),
-# la alerta "API A - errores 5xx" pasa a Firing y llega el correo. Al desactivar, el reintento pasa,
-# el mensaje queda en Object Storage y la alerta se resuelve.
+# Qué se ve: el orquestador falla en el paso api_a, Pub/Sub reintenta 5 veces (panel "Cola" -> reprocesados),
+# la alerta "API A - errores 5xx" pasa a Firing y llega el correo. Al desactivar, los mensajes se reenvían
+# con el mismo trace_id, quedan en Object Storage y la alerta se resuelve.
 # Requiere DEMO_FAILURE_ENABLED=true en el ConfigMap.
 set -euo pipefail
 BASE_URL="${BASE_URL:-http://157-137-193-66.sslip.io}"
@@ -36,10 +36,18 @@ case "${1:-}" in
     ;;
   desactivar)
     set_fallo false
-    echo "Pub/Sub reentrega con backoff; en unos segundos o minutos el flujo termina:"
+    # Pub/Sub reintenta 5 veces y luego manda el mensaje a la DLQ; aquí se reenvía con el mismo trace_id.
     while read -r trace; do
-      echo "  $BASE_URL/api/v2/storage/flujo/$trace"
-    done < "$IDS_FILE" 2>/dev/null || true
+      code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
+        -H "X-Trace-Id: $trace" -d '{"resource":"imagen","id":1}' "$ORQ_URL/api/v2/flujo")
+      echo "reproceso $code trace_id=$trace"
+    done < "$IDS_FILE"
+    sleep 15
+    while read -r trace; do
+      code=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/v2/storage/flujo/$trace")
+      echo "$code $BASE_URL/api/v2/storage/flujo/$trace"
+      echo "    $BASE_URL/api/v2/storage/adjunto/$trace/resumen.md"
+    done < "$IDS_FILE"
     ;;
   estado)
     curl -sf "$BASE_URL/api/v2/demo/fallo-flujo"
