@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.0 — 2026-10-13
+
+- Carpeta `terraform/`: un archivo por servicio (red, Object Storage, Autonomous Database Always Free, balanceador de 10 Mbps y VM con el API y PostgreSQL)
+- Pipeline manual que aplica Terraform e instala el API, y otro que destruye la infraestructura
+- `terraform/destruir.sh` para apagar todo al terminar la sustentación
+
 ## v2.3.0 — 2026-09-30
 
 - Consumidor del Object Storage (`storage_consumer/`): Deployment propio en OKE que genera `adjuntos/<trace_id>/resumen.md` por cada mensaje del flujo, con su imagen en OCIR y su pipeline `deploy-storage-consumer.yml`

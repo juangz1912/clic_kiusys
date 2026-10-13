@@ -197,6 +197,20 @@ El archivo `render.yaml` define 2 Web Services y **1 instancia PostgreSQL** con 
 
 Secrets GitHub: `RENDER_DEPLOY_HOOK_PRUEBAS`, `RENDER_DEPLOY_HOOK_PRODUCCION`, `RENDER_API_KEY`.
 
+## Terraform (Seguimiento #3)
+
+La infraestructura de OCI se crea con Terraform, un archivo por servicio, en [terraform/readme.md](terraform/readme.md).
+
+```bash
+cd terraform
+source ./env.sh
+terraform apply
+bash instalar_api.sh
+bash destruir.sh    # al terminar la sustentación
+```
+
+API de esta ejecución: http://157.137.198.114/api/v2/health
+
 ## Despliegue OKE (Seguimiento #2)
 
 Guía completa: [docs/OCI_DEPLOY.md](docs/OCI_DEPLOY.md)
@@ -211,7 +225,9 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Pipelines
 
-- `deploy-oke.yml` — en `main`: tests, imagen amd64 a OCIR y rollout en OKE
+- `terraform-oci.yml` — manual: `terraform apply` e instala el API en la VM
+- `terraform-destruir.yml` — manual: `terraform destroy`
+- `deploy-oke.yml` — manual. El clúster del seguimiento 2 ya no existe
 - `deploy-storage-consumer.yml` — en `main` cuando cambia `storage_consumer/`: tests, imagen a OCIR y rollout del consumidor
 - `deploy-render.yml` — hook de Render en `develop` (pruebas) y `main` (producción)
 
@@ -225,4 +241,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v2.3.0** (Seguimiento #2: logs en Loki, consumidor del Object Storage y alerta por fallo en un paso del flujo).
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v3.0.0** (Seguimiento #3: infraestructura OCI con Terraform).
