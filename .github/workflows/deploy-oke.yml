@@ -1,8 +1,9 @@
 name: Deploy OKE
 
+# El clúster del seguimiento 2 ya se eliminó. El seguimiento 3 despliega con
+# terraform-oci.yml. Este flujo queda manual para no apuntar a un clúster que no existe.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 env:
   OCI_REGION: sa-bogota-1

@@ -1,0 +1,59 @@
+name: Terraform OCI
+
+on:
+  workflow_dispatch:
+
+env:
+  TF_IN_AUTOMATION: "1"
+  OCI_REGION: sa-bogota-1
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Credenciales OCI
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY: ${{ secrets.OCI_CLI_KEY }}
+        run: |
+          mkdir -p "$HOME/.oci"
+          printf '%s\n' "$OCI_CLI_KEY" > "$HOME/.oci/ci_key.pem"
+          chmod 600 "$HOME/.oci/ci_key.pem"
+          printf '[DEFAULT]\nuser=%s\nfingerprint=%s\ntenancy=%s\nregion=%s\nkey_file=%s\n' \
+            "$OCI_CLI_USER" "$OCI_CLI_FINGERPRINT" "$OCI_CLI_TENANCY" "$OCI_REGION" "$HOME/.oci/ci_key.pem" \
+            > "$HOME/.oci/apikey.config"
+          chmod 600 "$HOME/.oci/apikey.config"
+          pip install oci-cli
+
+      - name: Bajar estado
+        working-directory: terraform
+        run: |
+          set +e
+          # shellcheck disable=SC1091
+          source ./env.sh
+          oci os object get --bucket-name clic-kiusys-tfstate --name terraform.tfstate --file terraform.tfstate
+          echo "estado=$?"
+
+      - name: Terraform apply
+        working-directory: terraform
+        run: |
+          # shellcheck disable=SC1091
+          source ./env.sh
+          terraform init -input=false
+          terraform apply -auto-approve -input=false
+
+      - name: Guardar estado
+        working-directory: terraform
+        run: bash guardar_estado.sh
+
+      - name: Instalar el API
+        working-directory: terraform
+        run: bash instalar_api.sh
