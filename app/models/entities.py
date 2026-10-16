@@ -33,6 +33,8 @@ class Vuelo(Base):
     fecha: Mapped[date] = mapped_column(Date)
     aeronave: Mapped[str] = mapped_column(String(20))
     capacidad: Mapped[int] = mapped_column(Integer)
+    # Expand: columna nueva con default. v2 no la devuelve. Borrarla sería Contract.
+    estado_operativo: Mapped[str] = mapped_column(String(20), default="programado", server_default="programado")
 
     asientos: Mapped[list["AsientoAsignado"]] = relationship(back_populates="vuelo")
 

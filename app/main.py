@@ -27,10 +27,15 @@ logging.getLogger("clic_kiusys").propagate = False
 from app.config import settings
 from app.telemetry import setup_telemetry
 from app.database import init_db
+from app.middleware.canary_fault import CanaryFaultMiddleware
 from app.middleware.metrics_v2 import V2MetricsMiddleware
+from app.middleware.sli import SliMiddleware
 from app.middleware.trace_id import TraceIdMiddleware
+from app.middleware.version_header import VersionHeaderMiddleware
 from app.routes import router
+from app.routes.tablero import router as router_tablero
 from app.routes.v2 import router as router_v2
+from app.routes.v3 import router as router_v3
 
 
 @asynccontextmanager
@@ -41,13 +46,18 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app.add_middleware(CanaryFaultMiddleware)
+app.add_middleware(SliMiddleware)
 app.add_middleware(V2MetricsMiddleware)
+app.add_middleware(VersionHeaderMiddleware)
 app.add_middleware(TraceIdMiddleware)
 # Va después de los middlewares para que el span de OTel los envuelva y el log de
 # cada petición salga con el trace_id de la traza.
 setup_telemetry(app)
 app.include_router(router, prefix="/api")
 app.include_router(router_v2, prefix="/api/v2")
+app.include_router(router_v3, prefix="/api/v3")
+app.include_router(router_tablero)
 
 
 @app.get("/")

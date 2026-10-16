@@ -28,6 +28,8 @@ class Settings(BaseSettings):
 
     observability_saas_url: str = ""
     demo_failure_enabled: bool = False
+    app_version: str = "v2"
+    app_track: str = "stable"
 
     object_storage_backend: str = "local"
     object_storage_local_dir: str = "./data/object-storage"
