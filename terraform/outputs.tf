@@ -3,6 +3,16 @@ output "api_url" {
   value       = "http://${oci_load_balancer_load_balancer.api.ip_address_details[0].ip_address}/api/v2/health"
 }
 
+output "lb_ocid" {
+  description = "OCID del balanceador, para cambiar el peso del canary."
+  value       = oci_load_balancer_load_balancer.api.id
+}
+
+output "canary_percent" {
+  description = "Porcentaje público que va al canary."
+  value       = var.canary_percent
+}
+
 output "api_public_ip" {
   description = "IP pública de la VM del API."
   value       = data.oci_core_vnic.api.public_ip_address

@@ -41,24 +41,25 @@ for _ in range(60):
 sys.exit('Postgres no abrió el puerto 5432')
 PY"
 
-tar -C "$ROOT" -czf /tmp/clic-api.tgz app requirements.txt
+tar -C "$ROOT" -czf /tmp/clic-api.tgz Dockerfile app requirements.txt pytest.ini
 scp -i "$KEY" -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null /tmp/clic-api.tgz "opc@$API_IP:/tmp/clic-api.tgz"
 
-echo "Instalando dependencias y arrancando uvicorn"
+echo "Construyendo la imagen y levantando stable y canary"
 "${SSH[@]}" "sudo bash -s" <<EOF
 set -euo pipefail
-mkdir -p /opt/clic-kiusys
-tar -xzf /tmp/clic-api.tgz -C /opt/clic-kiusys
+mkdir -p /opt/clic-kiusys/src
+tar -xzf /tmp/clic-api.tgz -C /opt/clic-kiusys/src
 if ! grep -q '^PUBLIC_API_BASE_URL=' /opt/clic-kiusys/api.env; then
   echo 'PUBLIC_API_BASE_URL=http://${LB_IP}' >> /opt/clic-kiusys/api.env
 fi
-python3 -m venv /opt/clic-kiusys/venv
-/opt/clic-kiusys/venv/bin/pip install --upgrade pip
-/opt/clic-kiusys/venv/bin/pip install -r /opt/clic-kiusys/requirements.txt
-sed -i 's|^ExecStart=.*|ExecStart=/opt/clic-kiusys/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000|' /etc/systemd/system/clic-api.service
-systemctl daemon-reload
-systemctl restart clic-api.service
-systemctl is-active clic-api.service
+systemctl disable --now clic-api.service || true
+podman build -t clic-kiusys:canary /opt/clic-kiusys/src
+podman image inspect clic-kiusys:canary --format '{{.Digest}}' | tee /opt/clic-kiusys/image-digest.txt
+podman rm -f clic-stable clic-canary || true
+podman run -d --name clic-stable --network host --restart=always --env-file /opt/clic-kiusys/api.env \
+  -e APP_TRACK=stable -e APP_VERSION=v2 -e PORT=8000 clic-kiusys:canary
+podman run -d --name clic-canary --network host --restart=always --env-file /opt/clic-kiusys/api.env \
+  -e APP_TRACK=canary -e APP_VERSION=v3 -e PORT=8001 clic-kiusys:canary
 EOF
 
 echo "Esperando /api/v2/health"

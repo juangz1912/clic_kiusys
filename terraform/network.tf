@@ -70,10 +70,20 @@ resource "oci_core_security_list" "public" {
   ingress_security_rules {
     protocol    = "6"
     source      = "0.0.0.0/0"
-    description = "API y health check del balanceador"
+    description = "API stable y health check del balanceador"
     tcp_options {
       min = 8000
       max = 8000
+    }
+  }
+
+  ingress_security_rules {
+    protocol    = "6"
+    source      = "10.0.0.0/16"
+    description = "API canary, solo desde la VCN"
+    tcp_options {
+      min = 8001
+      max = 8001
     }
   }
 

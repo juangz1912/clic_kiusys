@@ -14,7 +14,7 @@ write_files:
       DATABASE_URL=postgresql://pss:${db_password}@127.0.0.1:5432/pss_produccion
       ENVIRONMENT=produccion
       CLOUD_PROVIDER=oci
-      OKE_CLUSTER_NAME=vm-e5-flex
+      OKE_CLUSTER_NAME=vm-a1-flex
       OBJECT_STORAGE_BACKEND=oci
       OCI_OS_NAMESPACE=${namespace}
       OCI_OS_BUCKET=${bucket}
@@ -66,4 +66,3 @@ runcmd:
   - python3 -m pip install --upgrade pip || true
   - systemctl daemon-reload
   - systemctl enable --now clic-postgres.service
-  - systemctl enable clic-api.service

@@ -1,7 +1,7 @@
 data "oci_core_images" "ol" {
   compartment_id   = local.compartment_id
   operating_system = "Oracle Linux"
-  shape            = "VM.Standard.E5.Flex"
+  shape            = "VM.Standard.A1.Flex"
   sort_by          = "TIMECREATED"
   sort_order       = "DESC"
 }
@@ -10,15 +10,14 @@ resource "oci_core_instance" "api" {
   compartment_id      = local.compartment_id
   availability_domain = local.availability_domain
   display_name        = "${local.name}-api"
-  # Ampere y E4 están sin capacidad en sa-bogota-1.
-  # E5.Flex de 1 OCPU y 4 GB es la VM pequeña que sí se pudo usar en el seguimiento 2.
+  # Always Free: Ampere A1, 1 OCPU y 6 GB (dentro de 4 OCPU / 24 GB).
   # Hay que destruirla al terminar la sustentación: bash destruir.sh
-  shape         = "VM.Standard.E5.Flex"
+  shape         = "VM.Standard.A1.Flex"
   freeform_tags = local.tags
 
   shape_config {
     ocpus         = 1
-    memory_in_gbs = 4
+    memory_in_gbs = 6
   }
 
   source_details {
