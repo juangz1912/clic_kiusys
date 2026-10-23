@@ -1,0 +1,8 @@
+{
+  "minimo_muestra": 50,
+  "z_max": 1.96,
+  "ratio_5xx_max": 0.05,
+  "p95_factor": 2.0,
+  "p95_piso_ms": 400,
+  "notas": "50 peticiones por track es el mínimo para decidir. z>1.96 compara el canary contra el baseline al 95%. Un 5xx mayor al 5% aborta aunque el baseline también falle."
+}

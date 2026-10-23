@@ -1,0 +1,8 @@
+{
+  "etapas": [
+    {"nombre": "0", "porcentaje": 0, "horneado_minutos": 0, "acceso": "solo cabecera x-canary: true"},
+    {"nombre": "1", "porcentaje": 10, "horneado_minutos": 10, "acceso": "10% del tráfico público"},
+    {"nombre": "2", "porcentaje": 50, "horneado_minutos": 10, "acceso": "50% del tráfico público"},
+    {"nombre": "3", "porcentaje": 100, "horneado_minutos": 5, "acceso": "100% promovido"}
+  ]
+}
