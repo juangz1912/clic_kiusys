@@ -1,0 +1,28 @@
+upstream stable {
+    server stable:8000;
+}
+
+upstream canary {
+    server canary:8000;
+}
+
+upstream split {
+    server stable:8000 weight=STABLE_WEIGHT;
+CANARY_LINE
+}
+
+map $http_x_canary $destino {
+    default split;
+    "true"  canary;
+    "false" stable;
+}
+
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://$destino;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
