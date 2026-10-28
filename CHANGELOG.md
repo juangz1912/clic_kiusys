@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.0.0 — 2026-10-28
+
+- api/v3 convive con api/v2. El balanceador de OCI reparte 0, 10, 50 o 100 por ciento y la cabecera `x-canary` fija el track
+- Expand/Contract: columna `estado_operativo` en vuelos, visible solo en v3
+- SLI por track, prueba z contra el baseline y degradación inyectable solo en el canary. Health, SLI y el interruptor quedan fuera de la falla para poder apagarla y no marcar el backend como caído
+- Tablero `/tablero` con stable y canary lado a lado
+
 ## v3.0.0 — 2026-10-13
 
 - Carpeta `terraform/`: un archivo por servicio (red, Object Storage, Autonomous Database Always Free, balanceador de 10 Mbps y VM con el API y PostgreSQL)

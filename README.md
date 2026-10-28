@@ -209,7 +209,52 @@ bash instalar_api.sh
 bash destruir.sh    # al terminar la sustentación
 ```
 
-API de esta ejecución: http://157.137.198.114/api/v2/health
+## Canary (entrega de despliegue)
+
+El API estable (v2) y el canary (v3) corren en la misma VM Always Free de OCI (`VM.Standard.A1.Flex`, 1 OCPU y 6 GB), como dos contenedores de una imagen identificada por digest. El balanceador de OCI reparte el tráfico. Hay que destruir la VM al terminar la sustentación con `bash terraform/destruir.sh`. Documentación de la estrategia que se tomó de referencia: [estrategias de Cloud Deploy](https://docs.cloud.google.com/deploy/docs/deployment-strategies?hl=es-419). Aquí el mecanismo es el de OCI, que es la nube del integrante A.
+
+```mermaid
+flowchart LR
+  Cliente[Cliente] --> LB[Balanceador OCI]
+  LB -->|"x-canary: true"| Canary[Contenedor canary :8001]
+  LB -->|"x-canary: false"| Stable[Contenedor stable :8000]
+  LB -->|"sin cabecera, según peso"| Split[Backend set ponderado]
+  Split --> Stable
+  Split --> Canary
+  Stable --> PG[(PostgreSQL)]
+  Canary --> PG
+```
+
+No hay sticky sessions: cada petición se sortea de nuevo, para que la muestra del canary no se quede pegada a unos pocos clientes. Quien quiera fijar el track usa la cabecera.
+
+| Etapa | Tráfico público al canary | Horneado | Cómo entrar |
+| --- | --- | --- | --- |
+| 0 | 0% | 0 | Solo `x-canary: true` |
+| 1 | 10% | 10 min | Tráfico normal, más la cabecera para forzar |
+| 2 | 50% | 10 min | Igual |
+| 3 | 100% | 5 min | Todo el público cae en v3 |
+
+Expand/Contract: `vuelos.estado_operativo` se agrega con default `programado`. v2 no lo devuelve ni lo exige. No se borra ni se renombra ninguna columna, así un rollback del canary no toca los datos.
+
+El cambio visible de v3 es ese estado (`programado`, `demorado`, `cancelado`) en `/api/v3/entidades/vuelos`. Cada respuesta lleva `X-App-Version` y `X-App-Track`.
+
+La decisión de promover o abortar está en `canary/slo.json` y `canary/estadistica.py`: mínimo 50 peticiones por track, prueba z al 95% contra el baseline, y aborto si el canary pasa de 5% de 5xx o si su p95 crece más del doble. `PUT /api/v3/demo/degradacion` inyecta errores o latencia solo en el canary, y no toca `/health`, `/sli` ni el propio interruptor: el balanceador sigue viendo el backend sano y la muestra no se diluye con chequeos.
+
+```bash
+bash canary/carga.sh http://IP 50
+python3 canary/evaluar.py http://IP
+bash canary/peso.sh 10    # o 0 para abortar
+```
+
+Tablero en vivo: `http://IP/tablero`. Compara stable y canary lado a lado.
+
+OCI Bogotá no tiene capacidad Ampere y la cuota de E5 está en cero. El mismo reparto (cabecera y pesos 0, 10, 50, 100) queda levantado con nginx y dos contenedores de la misma imagen:
+
+```bash
+CANARY_BACKEND=compose bash canary/peso_compose.sh 0
+docker compose -f canary/compose/docker-compose.yml up -d --build
+CANARY_BACKEND=compose bash canary/demo.sh http://127.0.0.1:8080
+```
 
 ## Despliegue OKE (Seguimiento #2)
 
@@ -225,6 +270,7 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Pipelines
 
+- `canary.yml` — manual: fija el porcentaje del canary (0, 10, 50, 100) y puede reinstalar los dos contenedores
 - `terraform-oci.yml` — manual: `terraform apply` e instala el API en la VM
 - `terraform-destruir.yml` — manual: `terraform destroy`
 - `deploy-oke.yml` — manual. El clúster del seguimiento 2 ya no existe
@@ -241,4 +287,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v3.0.0** (Seguimiento #3: infraestructura OCI con Terraform).
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v4.0.0** (canary: api/v3 convive con api/v2).
