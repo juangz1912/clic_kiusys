@@ -291,7 +291,7 @@ python3 chaos/gate.py
 
 ## Defensa en profundidad
 
-El informe de controles de Juan es `chaos/security/informe-game-day.md` (experimento 3, telemetría). No usa el p99. Daniel Morales hizo el 1, Sebastián Quintero el 2 y el 4 es el de los datos, más abajo.
+El informe único del game day, con los cuatro experimentos, es [chaos/security/informe-game-day-grupo.md](chaos/security/informe-game-day-grupo.md). No usa el p99. El de Juan sobre telemetría sigue en `chaos/security/informe-game-day.md`. Daniel Morales hizo el 1 y Sebastián Quintero el 2.
 
 ```mermaid
 flowchart LR
