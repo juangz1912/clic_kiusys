@@ -1,0 +1,8 @@
+{
+  "nombre": "ausencia de latido de la API de vuelos",
+  "senal": "GET /internal/latido deja de avanzar",
+  "umbral_segundos": 3,
+  "alerta": "no data",
+  "marcos": ["ATT&CK T1562.001", "D3FEND D3-PM", "ISO 27001 A.8.16", "NIST AU-5"],
+  "reversion": "POST /internal/chaos tipo telemetria pausada false"
+}

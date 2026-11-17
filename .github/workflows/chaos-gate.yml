@@ -1,0 +1,34 @@
+name: Chaos gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      ventana_autorizada:
+        description: "Escribir si solo si la ventana del grupo esta abierta"
+        required: true
+        type: string
+
+jobs:
+  puerta:
+    if: github.event.inputs.ventana_autorizada == 'si'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dependencias
+        run: pip install -r requirements.txt
+      - name: Rondas y reversion
+        run: python3 chaos/run_rondas.py
+      - name: Reversion de cierre
+        if: always()
+        run: python3 chaos/run_rondas.py --revertir || true
+      - name: Puerta de la metrica
+        run: python3 chaos/gate.py
+      - name: Subir resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chaos-results
+          path: chaos/results/

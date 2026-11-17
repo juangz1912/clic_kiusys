@@ -1,0 +1,9 @@
+{
+  "fecha": "2026-11-16",
+  "latido_avanza_en_estado_estable": true,
+  "ronda_0": {"alerta": false, "observacion_s": 4},
+  "ronda_1": {"alerta": "ausencia de latido", "mttd_s": 3.08},
+  "telemetria_restaurada": true,
+  "bitacora_truncar_permitido": false,
+  "inyeccion": {"ejecutada": false, "reportada_como_dato": true, "id": 1}
+}

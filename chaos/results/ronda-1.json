@@ -1,0 +1,57 @@
+{
+  "ronda": "1",
+  "perfil": {
+    "hilos": 12,
+    "segundos": 20,
+    "timeout_s": 6,
+    "p99_ms": 2000
+  },
+  "admision": true,
+  "sin_fallo": {
+    "peticiones": 20750,
+    "ok": 1817,
+    "rechazos_429": 9905,
+    "errores_5xx_o_timeout": 9028,
+    "por_codigo": {
+      "429": 9905,
+      "200": 1817,
+      "0": 9028
+    },
+    "tasa_error": 0.4351,
+    "throughput_rps": 1037.5,
+    "p99_ms": 47.9,
+    "p95_ms": 29.2
+  },
+  "con_fallo": {
+    "peticiones": 26287,
+    "ok": 29,
+    "rechazos_429": 11439,
+    "errores_5xx_o_timeout": 14819,
+    "por_codigo": {
+      "0": 14792,
+      "429": 11439,
+      "503": 27,
+      "200": 29
+    },
+    "tasa_error": 0.5637,
+    "throughput_rps": 1314.35,
+    "p99_ms": 44.7,
+    "p95_ms": 12.0
+  },
+  "despues_de_revertir": {
+    "peticiones": 24640,
+    "ok": 1492,
+    "rechazos_429": 7930,
+    "errores_5xx_o_timeout": 15218,
+    "por_codigo": {
+      "429": 7930,
+      "200": 1492,
+      "0": 15218
+    },
+    "tasa_error": 0.6176,
+    "throughput_rps": 1232.0,
+    "p99_ms": 48.7,
+    "p95_ms": 28.0
+  },
+  "hipotesis_p99": "se sostiene"
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Caos vuelos - rondas 0 y 1",
+  "tags": ["clic-kiusys", "caos"],
+  "time": {"from": "now-30m", "to": "now"},
+  "panels": [
+    {"title": "p99 ronda 0 y ronda 1", "type": "timeseries", "targets": [{"expr": "http_req_duration_p99{service=\"clic-kiusys-api\",ronda=~\"0|1\"}"}]},
+    {"title": "errores 5xx y timeouts", "type": "timeseries", "targets": [{"expr": "http_req_failed{service=\"clic-kiusys-api\"}"}]},
+    {"title": "rechazos 429 de admision", "type": "stat", "targets": [{"expr": "http_429{service=\"clic-kiusys-api\"}"}]},
+    {"title": "pool activo", "type": "stat", "targets": [{"expr": "chaos_fault_active{service=\"clic-kiusys-api\"}"}]},
+    {"title": "latido de telemetria", "type": "stat", "targets": [{"expr": "telemetry_heartbeat{service=\"clic-kiusys-api\"}"}]}
+  ]
+}

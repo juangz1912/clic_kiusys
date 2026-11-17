@@ -256,6 +256,37 @@ docker compose -f canary/compose/docker-compose.yml up -d --build
 CANARY_BACKEND=compose bash canary/demo.sh http://127.0.0.1:8080
 ```
 
+## Release 5: Ingeniería del Caos
+
+La API de vuelos es la segunda dependencia del flujo del coordinador. El fallo de este integrante es el agotamiento del pool de la ruta `GET /api/v2/entidades/vuelos/random`. La métrica única es el p99. El informe, con las dos rondas, está en [chaos/informe-experimento.md](chaos/informe-experimento.md). El game day de telemetría es otro documento: [chaos/security/informe-game-day.md](chaos/security/informe-game-day.md).
+
+```mermaid
+flowchart LR
+  k6[PerfilP] --> Api[API vuelos]
+  Api --> Pool[Pool de la ruta random]
+  Switch[POST /internal/chaos] --> Pool
+  Api --> Medicion[p99 en chaos/results]
+```
+
+El punto de inyección es solo ese pool, dentro de este proceso. El radio no incluye la base como dato, ni la API de adopción en AWS, ni el coordinador en GCP. Ahí se mide el p99: en la carga del perfil P, guardada en `chaos/results/`.
+
+| Integrante | Dónde | Fallo | Métrica | Patrón |
+| --- | --- | --- | --- | --- |
+| Juan | API de vuelos, OCI | Agotamiento del pool | p99 menor a 2000 ms | Admisión con 429 y mamparo de 400 ms |
+| Adopción | AWS | Latencia o caída, en ese repo | La de esa hipótesis | La que salga de su ronda 0 |
+| Coordinador | GCP | El fallo distinto que falta | La de esa hipótesis | La que salga de su ronda 0 |
+
+Los tres fallos tienen que ser de naturaleza distinta. Aquí solo está implementado el de Juan. Los otros dos no se inventan en este repositorio.
+
+Del seguimiento 2 se conserva la API v2, el `X-Trace-Id` y el modelo de vuelos. No se reconstruye la cola ni la caché. El clúster de OKE ya no existe. El mensaje del orquestador (`POST /api/v2/mensaje`) se puede llamar, pero no entra en este flujo. El consumidor de Object Storage queda en el repo y no participa en el experimento.
+
+La URL pública del seguimiento 2 (`http://157-137-193-66.sslip.io`) no estaba sirviendo esta ruta el 16 de noviembre de 2026. La medición se hizo en local con el perfil P. Cuando la VM de OCI exista, esa URL https es la que hay que guardar en `medical-api-api-a-url`.
+
+```bash
+python3 chaos/run_rondas.py
+python3 chaos/gate.py
+```
+
 ## Despliegue OKE (Seguimiento #2)
 
 Guía completa: [docs/OCI_DEPLOY.md](docs/OCI_DEPLOY.md)
@@ -271,6 +302,7 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 ## Pipelines
 
 - `canary.yml` — manual: fija el porcentaje del canary (0, 10, 50, 100) y puede reinstalar los dos contenedores
+- `chaos-gate.yml` — manual, solo con la ventana autorizada: corre las dos rondas, revierte y falla si el p99 de la ronda 1 pasa de 2000 ms
 - `terraform-oci.yml` — manual: `terraform apply` e instala el API en la VM
 - `terraform-destruir.yml` — manual: `terraform destroy`
 - `deploy-oke.yml` — manual. El clúster del seguimiento 2 ya no existe
@@ -287,4 +319,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v4.0.0** (canary: api/v3 convive con api/v2).
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v5.0.0** (caos). El canary quedó documentado como v4.0.0.

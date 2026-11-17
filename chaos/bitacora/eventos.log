@@ -1,0 +1,13 @@
+pool tamano=1 hold_ms=700 ttl=180
+reversion del pool
+pool tamano=1 hold_ms=700 ttl=180
+reversion del pool
+pool tamano=1 hold_ms=700 ttl=180
+reversion del pool
+pool tamano=1 hold_ms=700 ttl=180
+reversion del pool
+telemetria pausada=True
+telemetria pausada=False
+telemetria pausada=True
+telemetria pausada=False
+game day: intento de truncar

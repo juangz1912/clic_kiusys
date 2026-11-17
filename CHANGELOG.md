@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.0.0 — 2026-11-16
+
+- Fallo de agotamiento del pool en `GET /api/v2/entidades/vuelos/random`, con TTL y reversión
+- Dos rondas con el mismo perfil: sin protección el p99 fue 4705 ms; con admisión y mamparo, 44,7 ms
+- Informe del experimento en `chaos/informe-experimento.md` e informe aparte del game day de telemetría
+
 ## v4.0.0 — 2026-10-28
 
 - api/v3 convive con api/v2. El balanceador de OCI reparte 0, 10, 50 o 100 por ciento y la cabecera `x-canary` fija el track

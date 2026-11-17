@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     demo_failure_enabled: bool = False
     app_version: str = "v2"
     app_track: str = "stable"
+    chaos_token: str = "caos-local"
+    admission_enabled: bool = False
+    admission_max_inflight: int = 2
+    bulkhead_enabled: bool = False
+    bulkhead_wait_ms: int = 400
 
     object_storage_backend: str = "local"
     object_storage_local_dir: str = "./data/object-storage"

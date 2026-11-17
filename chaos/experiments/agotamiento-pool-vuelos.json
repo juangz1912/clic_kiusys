@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "title": "Agotamiento del pool de la API de vuelos",
+  "description": "Estado estable: GET /api/v2/entidades/vuelos/random responde 200 y el p99 queda bajo 500 ms sin fallo. Hipotesis: dado el perfil P (12 hilos, 20 s, timeout de cliente 6 s), cuando el pool baje a 1 durante 20 s la API mantendra el p99 bajo 2000 ms. Metodo: POST /internal/chaos tipo pool, tamano 1, hold 700 ms. Radio: solo esta API, no se borran filas ni se toca AWS o GCP. Duracion: 20 s mas el TTL de 180 s como tope. Aborto: si el proceso de carga no termina o el health deja de responder, se llama DELETE /internal/chaos. Reversion: DELETE /internal/chaos restaura el pool y la telemetria, y se vuelve a medir el random en 200.",
+  "steady-state-hypothesis": {
+    "title": "el random responde y el p99 de la linea base esta bajo 500 ms",
+    "probes": [
+      {
+        "type": "probe",
+        "name": "random-200",
+        "tolerance": {"type": "probe", "name": "jsonpath", "path": "$.status", "expect": 200},
+        "provider": {
+          "type": "http",
+          "url": "${base}/api/v2/entidades/vuelos/random",
+          "timeout": 2
+        }
+      }
+    ]
+  },
+  "method": [
+    {
+      "type": "action",
+      "name": "reducir-pool",
+      "provider": {
+        "type": "process",
+        "path": "python3",
+        "arguments": ["chaos/run_rondas.py"]
+      }
+    }
+  ],
+  "rollbacks": [
+    {
+      "type": "action",
+      "name": "restaurar-pool",
+      "provider": {
+        "type": "process",
+        "path": "python3",
+        "arguments": ["chaos/run_rondas.py", "--revertir"]
+      }
+    }
+  ]
+}
