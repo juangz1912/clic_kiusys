@@ -21,7 +21,7 @@ Ventana: 16 de noviembre de 2026, corrida local de menos de un minuto. Radio: el
 
 ## Estado estable e hipótesis
 
-Antes de pausar nada, con el trace `gd-estable`, el latido avanzó. Durante 20,51 s de tráfico con la telemetría encendida, la regla no disparó. Falsos positivos de esa pasada: 0.
+Antes de pausar nada, con el trace `gd-estable`, el latido avanzó. Durante 20,34 s de tráfico con la telemetría encendida, la regla no disparó. Falsos positivos de esa pasada: 0.
 
 Hipótesis, declarada con umbrales antes de la ronda 0: dado el latido tal como está, cuando se pause la telemetría, la señal de ausencia aparece en T1 menor o igual a 3 segundos, y la contención (volver a ver el latido) ocurre en T2 menor o igual a 10 segundos.
 
@@ -29,36 +29,36 @@ Hipótesis, declarada con umbrales antes de la ronda 0: dado el latido tal como 
 
 | Hora UTC | Qué pasó | Trace |
 | --- | --- | --- |
-| 01:50:58 | Estado estable. El latido avanza | gd-estable |
-| 01:51:18 | Caso negativo: 20,51 s con telemetría sana y la regla no dispara | — |
-| 01:51:18 | Ronda 0. Se pausa la telemetría y nadie corre el detector | — |
-| 01:51:22 | Siguen 4 s en pausa. No hay alerta. La hipótesis se refuta | — |
-| 01:51:22 | Ronda 1. Se reanuda, se confirma tráfico y se vuelve a pausar | gd-ronda1 |
-| 01:51:26 | La regla escribe `ausencia de latido`. MTTD 3,08 s | gd-ronda1 |
-| 01:51:26 | Contención: `pausada=false` y un health. Telemetría verdadera. MTTC 0,01 s | gd-contencion |
-| 01:51:26 | Cinco health normales no tocan el señuelo. Luego se llama el señuelo | gd-senuelo |
-| 01:51:26 | Se crea el vuelo IJ01 con la instrucción en `aeronave`. HTTP 201. Capacidad 100 | gd-inyeccion |
+| 02:10:30 | Estado estable. El latido avanza | gd-estable |
+| 02:10:51 | Caso negativo: 20,34 s con telemetría sana y la regla no dispara | — |
+| 02:10:51 | Ronda 0. Se pausa la telemetría y nadie corre el detector | — |
+| 02:10:55 | Siguen 4 s en pausa. No hay alerta. La hipótesis se refuta | — |
+| 02:10:55 | Ronda 1. Se reanuda, se confirma tráfico y se vuelve a pausar | gd-ronda1 |
+| 02:10:58 | La regla escribe `ausencia de latido`. MTTD 3,06 s | gd-ronda1 |
+| 02:10:58 | Contención: `pausada=false` y un health. Telemetría verdadera. MTTC 0,01 s | gd-contencion |
+| 02:10:58 | Cinco health normales no tocan el señuelo. Luego se llama el señuelo | gd-senuelo |
+| 02:10:58 | Se crea el vuelo IJ01 con la instrucción en `aeronave`. HTTP 201. Capacidad 100 | gd-inyeccion |
 
 ## Dos rondas
 
 | | Ronda 0, sin la regla en marcha | Ronda 1, con la regla |
 | --- | --- | --- |
-| MTTD | no hubo detección en 4 s | 3,08 s (T1 era 3 s; el sondeo de 0,5 s lo deja 0,08 s por encima) |
+| MTTD | no hubo detección en 4 s | 3,06 s (T1 era 3 s; el sondeo de 0,5 s lo deja 0,06 s por encima) |
 | MTTC | no aplica: no hubo alerta que contener | 0,01 s, dentro de T2 |
 | Cobertura | 0 de 1 | 1 de 1 |
 | Falsos positivos | 0 en el caso negativo previo | 0 |
 
-La ronda 0 refuta la hipótesis: el control, tal como estaba, no produce señal si nadie mira el silencio. La ronda 1 la sostiene en lo que importa, que es que el silencio ahora se nombra. El 0,08 s de más es el intervalo de consulta, no un fallo de la idea.
+La ronda 0 refuta la hipótesis: el control, tal como estaba, no produce señal si nadie mira el silencio. La ronda 1 la sostiene en lo que importa, que es que el silencio ahora se nombra. El 0,06 s de más es el intervalo de consulta, no un fallo de la idea.
 
 ## Detección como código
 
-La regla está en `chaos/security/detecciones/ausencia-latido.json` y el ejecutor en `chaos/security/detectar_latido.py`. El caso positivo es la ronda 1 (sale 0 y escribe la alerta). El caso negativo es la pasada de 20,51 s con telemetría sana (sale 1 y no escribe alerta). La misma regla, como alerta de Grafana con `noDataState: Alerting`, está versionada en `observability/grafana/alert-ausencia-latido.json`. No está aplicada en Grafana Cloud: no hay token en el repo y no hay VM. La que se ejecutó es la del proceso.
+La regla está en `chaos/security/detecciones/ausencia-latido.json` y el ejecutor en `chaos/security/detectar_latido.py`. El caso positivo es la ronda 1 (sale 0 y escribe la alerta). El caso negativo es la pasada de 20,34 s con telemetría sana (sale 1 y no escribe alerta). La misma regla, como alerta de Grafana con `noDataState: Alerting`, está versionada en `observability/grafana/alert-ausencia-latido.json`. No está aplicada en Grafana Cloud: no hay token en el repo y no hay VM. La que se ejecutó es la del proceso.
 
 La segunda mejora es la bitácora que no se trunca. `truncar()` lanza `PermissionError`. Eso no es un object lock de OCI. Es la propiedad local de no borrar el rastro desde la aplicación.
 
 ## IA en la defensa, con una persona en el medio
 
-Un asistente leyó `game-day.json` y propuso la cronología de la tabla de arriba. Acertó el MTTD de 3,08 s, el MTTC de 0,01 s, el trace `gd-ronda1` y que la inyección no cambió la capacidad. Inventó, y se descartó, que Grafana Cloud hubiera disparado la alerta de ausencia: el archivo de Grafana solo está versionado, y la única alerta con sello es la del script. También se descartó tratar el 0,08 s sobre T1 como si la ronda 1 hubiera fallado por completo: la ronda 0 no detectaba nada, y esa es la diferencia que el control corrige. La decisión de dejar esos descartes escritos es de quien firma el informe, no del asistente. El contraste está en `chaos/security/ia/analisis-defensa.md`.
+Un asistente leyó `game-day.json` y propuso la cronología de la tabla de arriba. Acertó el MTTD de 3,06 s, el MTTC de 0,01 s, el trace `gd-ronda1` y que la inyección no cambió la capacidad. Inventó, y se descartó, que Grafana Cloud hubiera disparado la alerta de ausencia: el archivo de Grafana solo está versionado, y la única alerta con sello es la del script. También se descartó tratar el 0,06 s sobre T1 como si la ronda 1 hubiera fallado por completo: la ronda 0 no detectaba nada, y esa es la diferencia que el control corrige. La decisión de dejar esos descartes escritos es de quien firma el informe, no del asistente. El contraste está en `chaos/security/ia/analisis-defensa.md`.
 
 ## Inyección en un dato, repetida
 
@@ -68,7 +68,7 @@ No hay un modelo en esta API. La instrucción va en `aeronave` del vuelo IJ01: "
 
 Señuelo. `GET /internal/senuelo` no forma parte del flujo de vuelos. Tocarla anexa `alerta senuelo` con el trace `gd-senuelo`. Cinco peticiones normales de health no produjeron ninguna línea de señuelo: 0 falsos. Consulta del 16 de noviembre de 2026 a Decoy Object, D3-DO, en https://d3fend.mitre.org/technique/d3f:DecoyObject/.
 
-Reporte con los plazos del Reglamento (UE) 2024/2847. El incidente simulado es la pausa del latido. El aviso temprano cabe en las 24 horas y la notificación, en las 72, porque la detección fue a los 3,08 s de enterarse. El texto está en `chaos/security/reporte-cra.md`. Fuente consultada el 16 de noviembre de 2026: https://digital-strategy.ec.europa.eu/en/policies/cra-reporting. Esas obligaciones de reporte rigen en la Unión desde el 11 de septiembre de 2026. En Colombia esta corrida no dispara un deber equivalente de fabricante: el canal nacional es ColCERT, y este ejercicio no le notificó nada porque el radio fue una máquina local con datos sintéticos.
+Reporte con los plazos del Reglamento (UE) 2024/2847. El incidente simulado es la pausa del latido. El aviso temprano cabe en las 24 horas y la notificación, en las 72, porque la detección fue a los 3,06 s de enterarse. El texto está en `chaos/security/reporte-cra.md`. Fuente consultada el 16 de noviembre de 2026: https://digital-strategy.ec.europa.eu/en/policies/cra-reporting. Esas obligaciones de reporte rigen en la Unión desde el 11 de septiembre de 2026. En Colombia esta corrida no dispara un deber equivalente de fabricante: el canal nacional es ColCERT, y este ejercicio no le notificó nada porque el radio fue una máquina local con datos sintéticos.
 
 ## Lecciones, residual y lo que sigue
 

@@ -2,56 +2,64 @@
   "ronda": "1",
   "perfil": {
     "hilos": 12,
-    "segundos": 20,
+    "subida_s": 5,
+    "sosten_s": 20,
+    "bajada_s": 5,
     "timeout_s": 6,
-    "p99_ms": 2000
+    "p99_ms": 2000,
+    "instrumento": "k6"
   },
   "admision": true,
   "sin_fallo": {
-    "peticiones": 20750,
-    "ok": 1817,
-    "rechazos_429": 9905,
-    "errores_5xx_o_timeout": 9028,
+    "peticiones": 23365,
+    "ok": 5187,
+    "rechazos_429": 18178,
+    "errores_5xx_o_timeout": 0,
     "por_codigo": {
-      "429": 9905,
-      "200": 1817,
-      "0": 9028
+      "200": 5187,
+      "429": 18178,
+      "503": 0,
+      "otras": 0
     },
-    "tasa_error": 0.4351,
-    "throughput_rps": 1037.5,
-    "p99_ms": 47.9,
-    "p95_ms": 29.2
+    "tasa_error": 0.0,
+    "throughput_rps": 778.78,
+    "p99_ms": 46.3,
+    "p95_ms": 24.6,
+    "k6_exit": 0
   },
   "con_fallo": {
-    "peticiones": 26287,
-    "ok": 29,
-    "rechazos_429": 11439,
-    "errores_5xx_o_timeout": 14819,
+    "peticiones": 26046,
+    "ok": 43,
+    "rechazos_429": 25962,
+    "errores_5xx_o_timeout": 41,
     "por_codigo": {
-      "0": 14792,
-      "429": 11439,
-      "503": 27,
-      "200": 29
+      "200": 43,
+      "429": 25962,
+      "503": 41,
+      "otras": 0
     },
-    "tasa_error": 0.5637,
-    "throughput_rps": 1314.35,
-    "p99_ms": 44.7,
-    "p95_ms": 12.0
+    "tasa_error": 0.0016,
+    "throughput_rps": 845.52,
+    "p99_ms": 40.7,
+    "p95_ms": 13.6,
+    "k6_exit": 0
   },
   "despues_de_revertir": {
-    "peticiones": 24640,
-    "ok": 1492,
-    "rechazos_429": 7930,
-    "errores_5xx_o_timeout": 15218,
+    "peticiones": 22936,
+    "ok": 5057,
+    "rechazos_429": 17879,
+    "errores_5xx_o_timeout": 0,
     "por_codigo": {
-      "429": 7930,
-      "200": 1492,
-      "0": 15218
+      "200": 5057,
+      "429": 17879,
+      "503": 0,
+      "otras": 0
     },
-    "tasa_error": 0.6176,
-    "throughput_rps": 1232.0,
-    "p99_ms": 48.7,
-    "p95_ms": 28.0
+    "tasa_error": 0.0,
+    "throughput_rps": 764.22,
+    "p99_ms": 45.5,
+    "p95_ms": 25.0,
+    "k6_exit": 0
   },
   "hipotesis_p99": "se sostiene"
 }

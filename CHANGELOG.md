@@ -1,5 +1,10 @@
 # Changelog
 
+## v5.1.1 — 2026-11-16
+
+- Las dos rondas del pool quedaron medidas con k6 0.56.0, el mismo perfil en ambas
+- Ronda 0: p99 4667,5 ms. Ronda 1: p99 40,7 ms
+
 ## v5.1.0 — 2026-11-16
 
 - Game day de telemetría: regla de ausencia con caso negativo, MTTD 3,08 s y MTTC 0,01 s

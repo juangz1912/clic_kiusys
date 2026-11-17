@@ -346,4 +346,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v5.1.0** (game day de defensa, encima del caos v5.0.0). El canary quedó documentado como v4.0.0.
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v5.1.1** (las rondas del pool medidas con k6, encima del game day v5.1.0). El canary quedó documentado como v4.0.0.

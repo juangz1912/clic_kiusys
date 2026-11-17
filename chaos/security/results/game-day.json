@@ -1,62 +1,62 @@
 {
-  "fecha": "2026-11-17T01:51:26Z",
+  "fecha": "2026-11-17T02:10:58Z",
   "t1_s": 3,
   "t2_s": 10,
   "falsos_positivos_regla": 0,
   "mttd_ronda_0_s": null,
-  "mttd_ronda_1_s": 3.08,
+  "mttd_ronda_1_s": 3.06,
   "mttc_ronda_1_s": 0.01,
   "cobertura_ronda_0": 0,
   "cobertura_ronda_1": 1,
   "cronologia": [
     {
-      "t": "2026-11-17T01:50:58Z",
+      "t": "2026-11-17T02:10:30Z",
       "hecho": "estado estable",
       "trace_id": "gd-estable",
       "latido_avanza": true
     },
     {
-      "t": "2026-11-17T01:51:18Z",
+      "t": "2026-11-17T02:10:51Z",
       "hecho": "caso negativo de la regla",
       "disparo": false,
-      "segundos": 20.51
+      "segundos": 20.34
     },
     {
-      "t": "2026-11-17T01:51:18Z",
+      "t": "2026-11-17T02:10:51Z",
       "hecho": "ronda 0: telemetria pausada, sin detector"
     },
     {
-      "t": "2026-11-17T01:51:22Z",
+      "t": "2026-11-17T02:10:55Z",
       "hecho": "ronda 0: no hubo alerta",
       "mttd_s": null
     },
     {
-      "t": "2026-11-17T01:51:22Z",
+      "t": "2026-11-17T02:10:55Z",
       "hecho": "ronda 1: telemetria pausada",
       "trace_id": "gd-ronda1"
     },
     {
-      "t": "2026-11-17T01:51:26Z",
+      "t": "2026-11-17T02:10:58Z",
       "hecho": "ronda 1: alerta",
-      "salida": "{\"alerta\": \"ausencia de latido\", \"mttd_s\": 3.08}",
-      "mttd_s": 3.08
+      "salida": "{\"alerta\": \"ausencia de latido\", \"mttd_s\": 3.06}",
+      "mttd_s": 3.06
     },
     {
-      "t": "2026-11-17T01:51:26Z",
+      "t": "2026-11-17T02:10:58Z",
       "hecho": "contencion: latido reanudado",
       "telemetria": true,
       "mttc_s": 0.01,
-      "desde_pausa_s": 3.23
+      "desde_pausa_s": 3.18
     },
     {
-      "t": "2026-11-17T01:51:26Z",
+      "t": "2026-11-17T02:10:58Z",
       "hecho": "senuelo tocado",
       "trace_id": "gd-senuelo",
       "alerta": "senuelo",
       "falsos_en_trafico_normal": 0
     },
     {
-      "t": "2026-11-17T01:51:26Z",
+      "t": "2026-11-17T02:10:58Z",
       "hecho": "inyeccion en el campo aeronave",
       "trace_id": "gd-inyeccion",
       "status": 201,

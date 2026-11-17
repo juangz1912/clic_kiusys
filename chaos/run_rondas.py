@@ -11,13 +11,20 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "http://127.0.0.1:8011"
 TOKEN = "caos-local"
-PERFIL = {"hilos": 12, "segundos": 20, "timeout_s": 6, "p99_ms": 2000}
+PERFIL = {
+    "hilos": 12,
+    "subida_s": 5,
+    "sosten_s": 20,
+    "bajada_s": 5,
+    "timeout_s": 6,
+    "p99_ms": 2000,
+    "instrumento": "k6",
+}
 VUELO = {
     "numero_vuelo": "CA100",
     "origen": "BOG",
@@ -46,47 +53,60 @@ def pedir(url: str, method: str = "GET", body: dict | None = None, token: bool =
         return 0, {}
 
 
-def percentil(valores: list[float], p: float) -> float:
-    if not valores:
-        return 0.0
-    orden = sorted(valores)
-    idx = min(len(orden) - 1, max(0, int(round((p / 100) * (len(orden) - 1)))))
-    return round(orden[idx], 1)
+def k6_bin() -> str | None:
+    candidato = os.environ.get("K6_BIN", "k6")
+    from shutil import which
+
+    if os.path.isfile(candidato) and os.access(candidato, os.X_OK):
+        return candidato
+    return which("k6")
 
 
-def cargar() -> dict:
-    fin = time.perf_counter() + PERFIL["segundos"]
-    muestras: list[tuple[int, float]] = []
+def _cuenta(data: dict, nombre: str) -> int:
+    metricas = data.get("metrics", {}).get(nombre, {}).get("values", {})
+    return int(metricas.get("count", 0))
 
-    def bucle() -> None:
-        while time.perf_counter() < fin:
-            t0 = time.perf_counter()
-            codigo, _ = pedir(BASE + "/api/v2/entidades/vuelos/random", timeout=PERFIL["timeout_s"])
-            muestras.append((codigo, (time.perf_counter() - t0) * 1000))
 
-    with ThreadPoolExecutor(PERFIL["hilos"]) as pool:
-        futuros = [pool.submit(bucle) for _ in range(PERFIL["hilos"])]
-        for futuro in futuros:
-            futuro.result()
-    duraciones = [ms for _, ms in muestras]
-    n = len(muestras) or 1
-    errores = sum(1 for codigo, _ in muestras if codigo == 0 or codigo >= 500)
-    rechazos = sum(1 for codigo, _ in muestras if codigo == 429)
-    ok = sum(1 for codigo, _ in muestras if codigo == 200)
-    por_codigo: dict[str, int] = {}
-    for codigo, _ in muestras:
-        clave = str(codigo)
-        por_codigo[clave] = por_codigo.get(clave, 0) + 1
+def cargar(etiqueta: str) -> dict:
+    binario = k6_bin()
+    if not binario:
+        raise SystemExit("falta k6: el perfil fijo de las dos rondas es chaos/k6/vuelos.js")
+    env = os.environ.copy()
+    env["BASE_URL"] = BASE
+    env["RONDA"] = etiqueta
+    proc = subprocess.run(
+        [binario, "run", "chaos/k6/vuelos.js"],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode not in (0, 99):
+        raise SystemExit(proc.stderr[-800:] or proc.stdout[-800:])
+    ruta = ROOT / "chaos" / "results" / f"k6-ronda-{etiqueta}.json"
+    data = json.loads(ruta.read_text())
+    dur = data["metrics"]["http_req_duration"]["values"]
+    reqs = data["metrics"]["http_reqs"]["values"]
+    ok = _cuenta(data, "respuestas_200")
+    rechazos = _cuenta(data, "respuestas_429")
+    errores = _cuenta(data, "respuestas_503") + _cuenta(data, "respuestas_otras")
+    total = int(reqs.get("count", 0)) or 1
     return {
-        "peticiones": len(muestras),
+        "peticiones": int(reqs.get("count", 0)),
         "ok": ok,
         "rechazos_429": rechazos,
         "errores_5xx_o_timeout": errores,
-        "por_codigo": por_codigo,
-        "tasa_error": round(errores / n, 4),
-        "throughput_rps": round(len(muestras) / PERFIL["segundos"], 2),
-        "p99_ms": percentil(duraciones, 99),
-        "p95_ms": percentil(duraciones, 95),
+        "por_codigo": {
+            "200": ok,
+            "429": rechazos,
+            "503": _cuenta(data, "respuestas_503"),
+            "otras": _cuenta(data, "respuestas_otras"),
+        },
+        "tasa_error": round(errores / total, 4),
+        "throughput_rps": round(float(reqs.get("rate", 0)), 2),
+        "p99_ms": round(float(dur["p(99)"]), 1),
+        "p95_ms": round(float(dur.get("p(95)", 0)), 1),
+        "k6_exit": proc.returncode,
     }
 
 
@@ -156,11 +176,11 @@ def medir(nombre: str, admision: bool, wait_ms: int) -> dict:
     try:
         esperar_health(proc)
         sembrar()
-        base = cargar()
+        base = cargar(f"{nombre}-base")
         inyectar(wait_ms)
-        fallo = cargar()
+        fallo = cargar(f"{nombre}-fallo")
         revertir()
-        despues = cargar()
+        despues = cargar(f"{nombre}-despues")
     finally:
         matar(proc)
     resultado = {

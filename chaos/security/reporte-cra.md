@@ -1,6 +1,6 @@
 # Reporte simulado con la estructura del CRA
 
-Incidente: pausa del latido de la API de vuelos. Enterado: 2026-11-17T01:51:22Z (inicio de la pausa de la ronda 1). Detección local: 2026-11-17T01:51:26Z. Datos sintéticos. Radio: un proceso local. No se notificó a una autoridad.
+Incidente: pausa del latido de la API de vuelos. Enterado: 2026-11-17T02:10:55Z (inicio de la pausa de la ronda 1). Detección local: 2026-11-17T02:10:58Z. Datos sintéticos. Radio: un proceso local. No se notificó a una autoridad.
 
 Aviso temprano, plazo de 24 horas del Reglamento (UE) 2024/2847. Cabe. Hay una pausa deliberada de la telemetría de un producto con elementos digitales, hecha por el propio grupo en una prueba. No hay indicios de un tercero.
 
