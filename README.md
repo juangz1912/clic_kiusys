@@ -57,7 +57,9 @@ flowchart LR
 | Angel Avirama | **AWS** (EKS) | API B: Animal, Adoptante, Adopción ([Api_Pet_Adoption](https://github.com/AngelAvirama/Api_Pet_Adoption)) | Caché Redis (ElastiCache) |
 | Leonardo Guevara | **GCP** (GKE + Cloud Run) | API C: Imagen, NotaMedica, DocumentoGenerado ([MedicalDevops](https://github.com/LeonardoG2005/MedicalDevops)) | Orquestador + cola Pub/Sub |
 
-URL pública de la API A: http://157-137-193-66.sslip.io
+URL pública de la API A: https://clic-kiusys-vuelos.up.railway.app
+
+El host viejo `http://157-137-193-66.sslip.io` ya no es esta API. Responde 308 a HTTPS y después `404 {"error":"no encontrado"}` desde un puente Python. El enlace que hay que usar, en https y sin redirección, es el de arriba. Health y vuelo random responden 200.
 
 ### Servicios adicionales (OCI)
 
@@ -79,21 +81,21 @@ URL pública de la API A: http://157-137-193-66.sslip.io
 
 ## Links de sustentación
 
-**API A en OKE** (`http://157-137-193-66.sslip.io`)
+**API A vigente** (`https://clic-kiusys-vuelos.up.railway.app`)
 
 | Qué mostrar | Link |
 |-------------|------|
-| Swagger | http://157-137-193-66.sslip.io/docs |
-| Health (nube, cluster, trace_id) | http://157-137-193-66.sslip.io/api/v2/health |
-| Vuelo random | http://157-137-193-66.sslip.io/api/v2/entidades/vuelos/random |
-| Pasajero random | http://157-137-193-66.sslip.io/api/v2/entidades/pasajeros/random |
-| Asiento asignado random | http://157-137-193-66.sslip.io/api/v2/entidades/asientos-asignados/random |
-| Vuelo por id + Animal (AWS) + Imagen (GCP) | http://157-137-193-66.sslip.io/api/v2/entidades/vuelos/1 |
-| Métricas RED del pod (p50/p95) | http://157-137-193-66.sslip.io/api/v2/metrics |
-| Snapshots en Object Storage | http://157-137-193-66.sslip.io/api/v2/storage/flujo |
-| Mensaje de un flujo del orquestador | http://157-137-193-66.sslip.io/api/v2/storage/flujo/revision-final-1 |
-| Adjunto generado por el consumidor | http://157-137-193-66.sslip.io/api/v2/storage/adjunto/revision-final-1/resumen.md |
-| Estado del fallo del paso api_a | http://157-137-193-66.sslip.io/api/v2/demo/fallo-flujo |
+| Swagger | https://clic-kiusys-vuelos.up.railway.app/docs |
+| Health (nube, cluster, trace_id) | https://clic-kiusys-vuelos.up.railway.app/api/v2/health |
+| Vuelo random | https://clic-kiusys-vuelos.up.railway.app/api/v2/entidades/vuelos/random |
+| Pasajero random | https://clic-kiusys-vuelos.up.railway.app/api/v2/entidades/pasajeros/random |
+| Asiento asignado random | https://clic-kiusys-vuelos.up.railway.app/api/v2/entidades/asientos-asignados/random |
+| Vuelo por id + Animal (AWS) + Imagen (GCP) | https://clic-kiusys-vuelos.up.railway.app/api/v2/entidades/vuelos/1 |
+| Métricas RED del pod (p50/p95) | https://clic-kiusys-vuelos.up.railway.app/api/v2/metrics |
+| Snapshots en Object Storage | https://clic-kiusys-vuelos.up.railway.app/api/v2/storage/flujo |
+| Mensaje de un flujo del orquestador | https://clic-kiusys-vuelos.up.railway.app/api/v2/storage/flujo/revision-final-1 |
+| Adjunto generado por el consumidor | https://clic-kiusys-vuelos.up.railway.app/api/v2/storage/adjunto/revision-final-1/resumen.md |
+| Estado del fallo del paso api_a | https://clic-kiusys-vuelos.up.railway.app/api/v2/demo/fallo-flujo |
 
 **Observabilidad**
 
@@ -131,11 +133,11 @@ URL pública de la API A: http://157-137-193-66.sslip.io
 # Flujo completo: orquestador (GCP) -> Pub/Sub -> API C (GCP) -> API B (AWS) -> API A (OCI) -> Object Storage
 curl -X POST -H "Content-Type: application/json" -H "X-Trace-Id: sustentacion-1" \
   -d '{"resource":"imagen","id":1}' https://medical-orchestrator-400345348270.us-central1.run.app/api/v2/flujo
-curl http://157-137-193-66.sslip.io/api/v2/storage/flujo/sustentacion-1
-curl http://157-137-193-66.sslip.io/api/v2/storage/adjunto/sustentacion-1/resumen.md
+curl https://clic-kiusys-vuelos.up.railway.app/api/v2/storage/flujo/sustentacion-1
+curl https://clic-kiusys-vuelos.up.railway.app/api/v2/storage/adjunto/sustentacion-1/resumen.md
 
 # Modificar un dato en tiempo real y verlo en el siguiente mensaje
-curl -X PUT -H "Content-Type: application/json" -d '{"destino":"CTG"}' http://157-137-193-66.sslip.io/api/vuelos/1
+curl -X PUT -H "Content-Type: application/json" -d '{"destino":"CTG"}' https://clic-kiusys-vuelos.up.railway.app/api/vuelos/1
 
 # Escalamiento: el HPA sube de 2 a 5 réplicas (y puede disparar la alarma de CPU de OCI)
 ./scripts/k8s_hpa_demo.sh
@@ -174,7 +176,7 @@ Estados de asiento: `seleccionado`, `asignado`, `expirado`.
 
 | Ambiente | URL cloud | API local | Base de datos |
 |----------|-----------|-----------|---------------|
-| **OKE (OCI, sa-bogota-1) — Seguimiento #2** | http://157-137-193-66.sslip.io | — | Postgres en cluster (block volume OCI) |
+| **Pública vigente** | https://clic-kiusys-vuelos.up.railway.app | — | SQLite en el servicio, con el vuelo CA100 |
 | Pruebas (Render, legado S1) | https://clic-kiusys-pruebas.onrender.com | http://localhost:8001 | postgres puerto 5433 |
 | Producción (Render, legado S1) | https://clic-kiusys-prod.onrender.com | http://localhost:8002 | postgres puerto 5434 |
 
@@ -280,7 +282,7 @@ Los tres fallos tienen que ser de naturaleza distinta. Aquí solo está implemen
 
 Del seguimiento 2 se conserva la API v2, el `X-Trace-Id` y el modelo de vuelos. No se reconstruye la cola ni la caché. El clúster de OKE ya no existe. El mensaje del orquestador (`POST /api/v2/mensaje`) se puede llamar, pero no entra en este flujo. El consumidor de Object Storage queda en el repo y no participa en el experimento.
 
-La URL pública del seguimiento 2 (`http://157-137-193-66.sslip.io`) no estaba sirviendo esta ruta el 16 de noviembre de 2026. La medición se hizo en local con el perfil P. Cuando la VM de OCI exista, esa URL https es la que hay que guardar en `medical-api-api-a-url`.
+La URL que el coordinador debe guardar en `medical-api-api-a-url` es `https://clic-kiusys-vuelos.up.railway.app`. El host `157-137-193-66.sslip.io` responde 404 desde un puente que no es esta API.
 
 ```bash
 python3 chaos/run_rondas.py
