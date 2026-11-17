@@ -1,4 +1,4 @@
-from app.services.bitacora import truncar
+from app.services.bitacora import RUTA, truncar
 from app.services.chaos_state import activar_pool, apagar, estado
 
 
@@ -37,3 +37,11 @@ def test_sin_cupo_responde_429(client, monkeypatch):
     finally:
         chaos_state._inflight = 0
         apagar()
+
+
+def test_el_senuelo_deja_alerta_con_trace(client):
+    antes = RUTA.read_text() if RUTA.exists() else ""
+    respuesta = client.get("/internal/senuelo", headers={"X-Trace-Id": "senuelo-prueba"})
+    assert respuesta.status_code == 200
+    assert respuesta.json()["trace_id"] == "senuelo-prueba"
+    assert "alerta senuelo tocado trace_id=senuelo-prueba" in RUTA.read_text().replace(antes, "")

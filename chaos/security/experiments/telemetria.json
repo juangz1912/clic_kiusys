@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "title": "Pausa de la telemetria de la API de vuelos",
+  "capa": "deteccion y respuesta",
+  "parada": "POST /internal/chaos tipo off, o tipo telemetria con pausada false",
+  "description": "Estado estable: el latido avanza con el trafico normal y la regla de ausencia no dispara. Hipotesis: dado el control de latido tal como esta, cuando se pause la telemetria, la senal de ausencia aparece en T1 <= 3 s y la contencion (reanudar el latido) ocurre en T2 <= 10 s. Metodo: POST /internal/chaos tipo telemetria. Radio: solo el latido de este proceso, no OCI Logging, no AWS, no GCP. Duracion: unos segundos. Aborto: si el health deja de responder, se llama la parada. Reversion: POST tipo telemetria pausada false y un health que vuelva a mover el latido.",
+  "method": ["python3", "chaos/security/run_game_day.py"],
+  "rollback": ["python3", "chaos/security/run_game_day.py", "--revertir"]
+}

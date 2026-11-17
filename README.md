@@ -287,6 +287,33 @@ python3 chaos/run_rondas.py
 python3 chaos/gate.py
 ```
 
+## Defensa en profundidad
+
+El informe de controles es otro archivo, `chaos/security/informe-game-day.md`. No usa el p99. El experimento de este integrante es el 3: telemetría y dato. Los experimentos 1, 2 y 4 no se rellenan desde aquí.
+
+```mermaid
+flowchart LR
+  Trafico[Trafico con trace id] --> Api[API de vuelos]
+  Api --> Latido[Latido del proceso]
+  Pausa[POST /internal/chaos telemetria] --> Latido
+  Latido --> Regla[Regla de ausencia]
+  Senuelo[GET /internal/senuelo] --> Bitacora[Bitacora de solo anexo]
+  Dato[Campo aeronave] --> Api
+```
+
+La frontera de esta capa es el proceso. No incluye la red de AWS ni la de GCP. La telemetría se recoge en `GET /internal/latido` y en `chaos/bitacora/eventos.log`.
+
+| Control | Experimento | Marco |
+| --- | --- | --- |
+| Latido | 3, pausa de telemetría | D3-PM, ISO 27001 A.8.16, NIST AU-5, verificación continua al estilo 800-207 |
+| Bitácora de solo anexo | 3, intento de truncar | ISO 27001 A.8.15, ATT&CK T1070 |
+| Señuelo | 3, ruta que el flujo no llama | D3-DO |
+| Dato que no es una orden | 3, inyección en `aeronave` | OWASP LLM01, ATLAS AML.T0051 |
+
+```bash
+python3 chaos/security/run_game_day.py
+```
+
 ## Despliegue OKE (Seguimiento #2)
 
 Guía completa: [docs/OCI_DEPLOY.md](docs/OCI_DEPLOY.md)
@@ -319,4 +346,4 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 
 ## Versionado
 
-Ver [CHANGELOG.md](CHANGELOG.md). Release **v5.0.0** (caos). El canary quedó documentado como v4.0.0.
+Ver [CHANGELOG.md](CHANGELOG.md). Release **v5.1.0** (game day de defensa, encima del caos v5.0.0). El canary quedó documentado como v4.0.0.

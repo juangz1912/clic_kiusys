@@ -1,5 +1,10 @@
 # Changelog
 
+## v5.1.0 — 2026-11-16
+
+- Game day de telemetría: regla de ausencia con caso negativo, MTTD 3,08 s y MTTC 0,01 s
+- Señuelo, reporte con la estructura del CRA e informe de defensa distinto del de rendimiento
+
 ## v5.0.0 — 2026-11-16
 
 - Fallo de agotamiento del pool en `GET /api/v2/entidades/vuelos/random`, con TTL y reversión

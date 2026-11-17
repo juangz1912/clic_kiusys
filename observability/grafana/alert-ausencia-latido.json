@@ -1,0 +1,13 @@
+{
+  "title": "Ausencia de latido de la API de vuelos",
+  "uid": "clic-ausencia-latido",
+  "condition": "A",
+  "noDataState": "Alerting",
+  "execErrState": "Error",
+  "for": "30s",
+  "annotations": {
+    "summary": "La serie del latido dejo de llegar. No es una alerta de errores 5xx."
+  },
+  "labels": {"service": "clic-kiusys-api", "capa": "deteccion"},
+  "notas": "Versionada para Grafana Cloud. En esta entrega la regla que si se ejecuto es chaos/security/detectar_latido.py, porque no hay VM ni token de Grafana en el repo."
+}
