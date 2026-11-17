@@ -1,0 +1,12 @@
+{
+  "nombre": "ruta de administracion visible desde el borde",
+  "senal": "una ruta del inventario administrativo responde algo distinto de 404 a traves del balanceador",
+  "inventario_admin": ["/internal/chaos", "/internal/latido", "/internal/senuelo", "/openapi.json", "/docs"],
+  "expuesta_si": "status != 404 (un 401 tambien cuenta: la ruta existe y es alcanzable)",
+  "sondeo_segundos": 0.5,
+  "umbral": "una observacion",
+  "origen": "fuera del proceso, contra la URL publica del borde",
+  "marcos": ["ATT&CK T1595.003", "ATT&CK T1190", "D3FEND D3-ITF", "OWASP API8:2023", "OWASP API9:2023", "ISO 27001 A.8.20", "NIST SC-7", "NIST CM-7"],
+  "contencion": "volver el borde a borde/allowlist.conf y recargar nginx",
+  "caso_negativo": "20 s de sondeo contra el borde allowlist con trafico publico sano: sale con codigo 1"
+}

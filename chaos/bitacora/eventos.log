@@ -39,3 +39,64 @@ apagado manual
 identidad ok sub=defensor jti=34e3d75a351a alcance=chaos:leer origen=127.0.0.1 trace_id=-
 identidad ok sub=defensor jti=d12742dfc504 alcance=chaos:revertir origen=127.0.0.1 trace_id=id-r1-cierre
 apagado manual
+pool tamano=1 hold_ms=700 ttl=180
+reversion del pool
+pool tamano=1 hold_ms=700 ttl=180
+reversion del pool
+pool tamano=1 hold_ms=700 ttl=180
+reversion del pool
+pool tamano=1 hold_ms=700 ttl=180
+reversion del pool
+telemetria pausada=True
+telemetria pausada=False
+telemetria pausada=True
+telemetria pausada=False
+game day: intento de truncar
+2026-11-17T21:30:56.80Z exp2 inicio game day exposicion
+2026-11-17T21:31:17.03Z exp2 ronda 0: borde abierto (deriva inyectada), sin detector
+alerta senuelo tocado trace_id=ge2-verificacion
+alerta senuelo tocado trace_id=ge2-verificacion
+alerta senuelo tocado trace_id=ge2-verificacion
+pool tamano=1 hold_ms=700 ttl=30
+reversion del pool
+alerta senuelo tocado trace_id=ge2-verificacion
+alerta senuelo tocado trace_id=ge2-verificacion
+alerta senuelo tocado trace_id=ge2-verificacion
+alerta senuelo tocado trace_id=ge2-verificacion
+2026-11-17T21:31:23.20Z exp2 ronda 0: reversion manual del borde y del pool
+2026-11-17T21:31:25.51Z exp2 ronda 1: borde abierto (deriva inyectada), detector corriendo
+alerta senuelo tocado trace_id=ge2-sonda
+2026-11-17T21:31:25.75Z exp2 alerta ruta de administracion expuesta mttd_s=0.236
+alerta senuelo tocado trace_id=ge2-verificacion
+rechazo token por defecto en produccion
+alerta senuelo tocado trace_id=ge2-verificacion
+alerta senuelo tocado trace_id=ge2-verificacion
+alerta senuelo tocado trace_id=ge2-verificacion
+2026-11-17T21:31:26.05Z exp2 contencion: borde allowlist mttc_s=0.126
+rechazo token por defecto en produccion
+rechazo token por defecto en produccion
+2026-11-17T21:31:26.27Z exp2 reversion: borde allowlist y pool apagado
+alerta senuelo tocado trace_id=senuelo-prueba
+rechazo token por defecto en produccion
+identidad ok sub=coordinador jti=da6955bdf869 alcance=chaos:leer origen=testclient trace_id=id-ok
+identidad rechazo motivo=token_estatico sub=- jti=- alcance_pedido=chaos:leer alcance_token=- origen=testclient trace_id=e79449e7-b4de-44ca-8781-8af6d3069b61
+identidad rechazo motivo=origen sub=coordinador jti=5d108869f476 alcance_pedido=chaos:leer alcance_token=chaos:leer origen=testclient trace_id=id-origen
+identidad rechazo motivo=alcance sub=coordinador jti=197fcb08097b alcance_pedido=chaos:pool alcance_token=chaos:telemetria origen=testclient trace_id=6d98833e-d68e-421f-adb7-2635d61a4512
+identidad rechazo motivo=vencido sub=coordinador jti=2997ab74ff55 alcance_pedido=chaos:leer alcance_token=chaos:leer origen=testclient trace_id=3d16d0d5-cad3-4ada-9c0b-808e163da5da
+identidad rechazo motivo=firma sub=- jti=- alcance_pedido=chaos:leer alcance_token=- origen=testclient trace_id=e28e8a3a-203c-49c1-b023-fff577f72acf
+identidad ok sub=defensor jti=d4d078dc25f6 alcance=identidad:revocar origen=testclient trace_id=9e95870c-02f5-4421-bea5-5993ff25bf3e
+contencion identidad jti=e23876e7d755 revocado trace_id=9e95870c-02f5-4421-bea5-5993ff25bf3e
+identidad rechazo motivo=revocado sub=coordinador jti=e23876e7d755 alcance_pedido=chaos:leer alcance_token=chaos:leer origen=testclient trace_id=2e0899f2-09a9-427f-b866-2793f005cf6f
+rechazo token por defecto en produccion
+alerta senuelo tocado trace_id=senuelo-prueba
+alerta senuelo tocado trace_id=senuelo-prueba
+rechazo token por defecto en produccion
+identidad ok sub=coordinador jti=b225a11cdea8 alcance=chaos:leer origen=testclient trace_id=id-ok
+identidad rechazo motivo=token_estatico sub=- jti=- alcance_pedido=chaos:leer alcance_token=- origen=testclient trace_id=bf9b6268-b792-4824-9f61-c948dc5a066a
+identidad rechazo motivo=origen sub=coordinador jti=65dd2f2118eb alcance_pedido=chaos:leer alcance_token=chaos:leer origen=testclient trace_id=id-origen
+identidad rechazo motivo=alcance sub=coordinador jti=e851caaa6ffc alcance_pedido=chaos:pool alcance_token=chaos:telemetria origen=testclient trace_id=6ed107e2-a211-41d4-be95-d2b37a0c8a52
+identidad rechazo motivo=vencido sub=coordinador jti=1620ae911b8e alcance_pedido=chaos:leer alcance_token=chaos:leer origen=testclient trace_id=12c32a7c-d7bb-4ef1-8876-0ce41e1def41
+identidad rechazo motivo=firma sub=- jti=- alcance_pedido=chaos:leer alcance_token=- origen=testclient trace_id=5144c675-75d7-4a8a-8d39-226d0367130c
+identidad ok sub=defensor jti=fa631450ab24 alcance=identidad:revocar origen=testclient trace_id=cde50d34-6cbb-440e-a65c-6b49f6cd2f85
+contencion identidad jti=5f9902ca2185 revocado trace_id=cde50d34-6cbb-440e-a65c-6b49f6cd2f85
+identidad rechazo motivo=revocado sub=coordinador jti=5f9902ca2185 alcance_pedido=chaos:leer alcance_token=chaos:leer origen=testclient trace_id=d2a7f0de-a534-483f-b00f-55357377e934

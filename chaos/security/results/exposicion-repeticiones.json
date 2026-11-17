@@ -1,0 +1,63 @@
+{
+  "nota": "seis corridas de run_exposicion.py el 17 nov 2026; la sexta es la de exposicion.json y la que dejo las lineas exp2 en la bitacora",
+  "corridas": [
+    {
+      "mttd_s": 0.237,
+      "mttc_s": 0.118,
+      "falsos": 0,
+      "r0_impacto": true,
+      "r1_impactos": 0,
+      "bypass": []
+    },
+    {
+      "mttd_s": 0.503,
+      "mttc_s": 0.124,
+      "falsos": 0,
+      "r0_impacto": true,
+      "r1_impactos": 0,
+      "bypass": []
+    },
+    {
+      "mttd_s": 0.377,
+      "mttc_s": 0.126,
+      "falsos": 0,
+      "r0_impacto": true,
+      "r1_impactos": 0,
+      "bypass": []
+    },
+    {
+      "mttd_s": 0.309,
+      "mttc_s": 0.125,
+      "falsos": 0,
+      "r0_impacto": true,
+      "r1_impactos": 0,
+      "bypass": []
+    },
+    {
+      "mttd_s": 0.035,
+      "mttc_s": 0.161,
+      "falsos": 0,
+      "r0_impacto": true,
+      "r1_impactos": 0,
+      "bypass": []
+    },
+    {
+      "mttd_s": 0.236,
+      "mttc_s": 0.126,
+      "falsos": 0,
+      "r0_impacto": true,
+      "r1_impactos": 0,
+      "bypass": []
+    }
+  ],
+  "mttd_s": {
+    "min": 0.035,
+    "mediana": 0.273,
+    "max": 0.503
+  },
+  "mttc_s": {
+    "min": 0.118,
+    "mediana": 0.1255,
+    "max": 0.161
+  }
+}

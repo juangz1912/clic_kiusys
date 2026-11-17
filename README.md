@@ -291,7 +291,7 @@ python3 chaos/gate.py
 
 ## Defensa en profundidad
 
-El informe de controles es otro archivo, `chaos/security/informe-game-day.md`. No usa el p99. El experimento de este integrante es el 3: telemetría y dato. El experimento 1 (identidad de máquinas, Daniel Morales) está en la sección siguiente. Los experimentos 2 y 4 no se rellenan desde aquí.
+El informe de controles de Juan es `chaos/security/informe-game-day.md` (experimento 3, telemetría). No usa el p99. Daniel Morales hizo el 1, Sebastián Quintero el 2 y el 4 es el de los datos, más abajo.
 
 ```mermaid
 flowchart LR
@@ -315,6 +315,8 @@ La frontera de esta capa es el proceso. No incluye la red de AWS ni la de GCP. L
 | Alcance por acción y lista de orígenes | 1, uso desde 127.0.0.2 y con alcance de pool | D3-AZET, D3-ANET, ISO 27001 A.8.2 y A.8.5, NIST AC-6, mínimo privilegio y verificación continua de 800-207 |
 | Revocación por `jti` | 1, contención sin reiniciar | D3-CR |
 | Regla `uso-credencial-no-previsto` | 1, caso positivo y negativo | ISO 27001 A.8.16, NIST AU-6 |
+| Allowlist del borde | 2, ruta administrativa expuesta | D3-ITF, NIST SC-7, ISO 27001 A.8.20 |
+| Copia aislada del objeto del flujo | 4, borrado del objeto primario | ISO 27001 A.8.13, NIST CP-9 |
 
 ```bash
 python3 chaos/security/run_game_day.py
@@ -345,6 +347,40 @@ python chaos/security/run_identidad.py --pausas   # demo paso a paso, tambien re
 ```
 
 Parada: Ctrl+C, o automatica si el health deja de responder antes de un uso adverso. Reversion: el `finally` manda `POST /internal/chaos {"tipo":"off"}`, apaga el proceso y verifica telemetria en `true` y pool inactivo. Cualquier corrida de las dos rondas reescribe `chaos/security/results/identidad.json` y anexa a la bitacora; la evidencia del informe es la del 17 de noviembre, se recupera con `git checkout -- chaos/security/results/identidad.json chaos/bitacora/eventos.log`.
+
+### Experimento 2: ruta de administración expuesta en el borde
+
+Sebastián Quintero Granada. Capa: borde y exposición. Informe: [chaos/security/informe-game-day-exposicion.md](chaos/security/informe-game-day-exposicion.md).
+
+```mermaid
+flowchart LR
+  Internet[Tercero en internet] --> Borde[Borde nginx]
+  Sonda[Detector de exposicion] --> Borde
+  Borde -->|/api y /| Api[API de vuelos]
+  Borde -.->|/internal, /docs: 404| Cerrado[No sale del borde]
+  Deriva[borde/abierto.conf] --> Borde
+```
+
+La frontera es el borde: lo que alguien fuera de la red puede alcanzar. En la ronda 0 el borde reenvía todo y nadie mira. En la ronda 1 la allowlist devuelve 404 en las rutas administrativas y el token `caos-local` no abre el interruptor en producción.
+
+| Control | Experimento | Marco |
+| --- | --- | --- |
+| Allowlist en el borde | 2, deriva que reenvía todo | D3-ITF, NIST SC-7 y CM-7, ISO 27001 A.8.20 |
+| Detector externo | 2, sondeo desde fuera | ATT&CK T1595.003 y T1190 |
+| Token público rechazado en producción | 2, uso de `caos-local` | NIST IA-5, ATT&CK T1552.001 |
+
+```bash
+python3 chaos/security/run_exposicion.py
+python3 chaos/security/run_exposicion.py --revertir
+```
+
+### Experimento 4: resiliencia de los datos del flujo
+
+Juan José Giraldo, con el grupo. El objeto del flujo vive en un almacén local que hace de bucket. La copia aislada no se sobrescribe ni se borra. Informe: [chaos/security/informe-datos.md](chaos/security/informe-datos.md).
+
+```bash
+python3 chaos/security/run_datos.py
+```
 
 ## Despliegue OKE (Seguimiento #2)
 

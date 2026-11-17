@@ -1,5 +1,10 @@
 # Changelog
 
+## v5.3.0 — 2026-11-17
+
+- Experimento 2 de Sebastián Quintero: ruta de administración expuesta en el borde, con allowlist y rechazo del token por defecto en producción
+- Experimento 4, datos del flujo: sin copia no hay recuperación; con la copia aislada el RPO fue 1,02 s y el RTO 0,0012 s
+
 ## v5.2.0 — 2026-11-17
 
 - Experimento 1 de identidad: credencial efímera del coordinador con alcance, origen y revocación detrás de `IDENTIDAD_ESTRICTA`

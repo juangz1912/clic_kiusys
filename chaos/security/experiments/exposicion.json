@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "title": "Ruta de administracion expuesta en el balanceador",
+  "integrante": "Sebastian Quintero Granada",
+  "experimento": 2,
+  "capa": "borde y exposicion",
+  "parada": "python3 chaos/security/run_exposicion.py --revertir (borde a allowlist, recarga, DELETE /internal/chaos)",
+  "description": "Estado estable: a traves del borde responden las rutas publicas y el inventario administrativo responde 404; el detector no dispara con trafico sano. Hipotesis: dado el borde y el interruptor tal como estan, cuando la configuracion del borde derive a reenviar todo (la plantilla actual del repo), la ruta administrativa expuesta se detecta en T1 <= 2 s y se contiene (borde de vuelta a allowlist y verificado desde fuera) en T2 <= 10 s, y en esa ventana un tercero con el token publico del repo no logra activar el interruptor. Metodo: se cambia el archivo de sitio de nginx por borde/abierto.conf y se recarga. Radio: un nginx y un proceso de la API en la maquina local, base SQLite sintetica. No toca OCI, AWS, GCP ni recursos de otros grupos. Aborto: si el health publico deja de responder por el borde, se ejecuta la parada.",
+  "t1_s": 2,
+  "t2_s": 10,
+  "method": ["python3", "chaos/security/run_exposicion.py"],
+  "rollback": ["python3", "chaos/security/run_exposicion.py", "--revertir"]
+}

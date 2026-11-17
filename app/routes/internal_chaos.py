@@ -29,6 +29,13 @@ def _exigir(token: str | None, request: Request, alcance: str) -> None:
     if not settings.identidad_estricta:
         if not token or token != settings.chaos_token:
             raise HTTPException(status_code=401, detail="token de caos invalido")
+        if (
+            settings.chaos_rechazar_token_defecto
+            and settings.environment == "produccion"
+            and token == "caos-local"
+        ):
+            anexar("rechazo token por defecto en produccion")
+            raise HTTPException(status_code=403, detail="token por defecto deshabilitado en produccion")
         return
     origen = request.client.host if request.client else "-"
     trace = getattr(request.state, "trace_id", "-")

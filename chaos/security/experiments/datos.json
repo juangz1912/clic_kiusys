@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "title": "Borrado del objeto del flujo",
+  "capa": "datos",
+  "parada": "no se borra la copia aislada; el primario se reescribe desde ella",
+  "description": "Estado estable: flujo/resumen.json existe con el vuelo CA100. Hipotesis: dado el almacen tal como esta, cuando se borre el objeto, se recupera con RPO menor o igual a 5 s y RTO menor o igual a 2 s. Metodo: borrar el primario. Radio: el directorio local del experimento, no el bucket de OCI ni nubes ajenas. Ronda 0 sin copia. Ronda 1 con copia aislada que no se sobrescribe ni se borra. Reversion: reescribir el primario desde la copia.",
+  "method": ["python3", "chaos/security/run_datos.py"]
+}

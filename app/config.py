@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     app_version: str = "v2"
     app_track: str = "stable"
     chaos_token: str = "caos-local"
+    # Experimento 2: en produccion el token publico del repo no abre el interruptor.
+    chaos_rechazar_token_defecto: bool = True
     # Experimento 1: en falso el plano de control acepta el token estático (ronda 0).
     identidad_estricta: bool = False
     identidad_secreto: str = "cambiar-en-cada-despliegue"

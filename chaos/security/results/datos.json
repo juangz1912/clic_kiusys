@@ -1,0 +1,44 @@
+{
+  "fecha": "2026-11-17T21:39:05Z",
+  "rpo_objetivo_s": 5,
+  "rto_objetivo_s": 2,
+  "ronda_0": {
+    "recuperado": false,
+    "rpo_s": null,
+    "rto_s": null,
+    "hipotesis": "se refuta"
+  },
+  "ronda_1": {
+    "recuperado": true,
+    "rpo_s": 1.02,
+    "rto_s": 0.0012,
+    "copia_borrable": false,
+    "hipotesis": "se sostiene"
+  },
+  "cronologia": [
+    {
+      "t": "2026-11-17T21:39:04Z",
+      "hecho": "estado estable",
+      "bytes": 51
+    },
+    {
+      "t": "2026-11-17T21:39:04Z",
+      "hecho": "ronda 0: objeto borrado, sin copia",
+      "recuperado": false,
+      "rpo_s": null,
+      "rto_s": null
+    },
+    {
+      "t": "2026-11-17T21:39:05Z",
+      "hecho": "ronda 1: primario borrado, copia intacta"
+    },
+    {
+      "t": "2026-11-17T21:39:05Z",
+      "hecho": "ronda 1: restaurado desde la copia aislada",
+      "igual_al_original": true,
+      "copia_borrable": false,
+      "rpo_s": 1.02,
+      "rto_s": 0.0012
+    }
+  ]
+}
