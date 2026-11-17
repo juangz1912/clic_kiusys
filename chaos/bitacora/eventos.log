@@ -11,3 +11,31 @@ telemetria pausada=False
 telemetria pausada=True
 telemetria pausada=False
 game day: intento de truncar
+telemetria pausada=True
+pool tamano=1 hold_ms=50 ttl=5
+telemetria pausada=True
+telemetria pausada=False
+apagado manual
+apagado manual
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-estable
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-0
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-1
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-2
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-3
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-4
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-5
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-6
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-7
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-8
+identidad ok sub=coordinador jti=416e08728ba7 alcance=chaos:leer origen=127.0.0.1 trace_id=id-r1-normal-9
+identidad rechazo motivo=origen sub=coordinador jti=74fb1d2c329b alcance_pedido=chaos:telemetria alcance_token=chaos:telemetria origen=127.0.0.2 trace_id=id-r1-origen
+identidad rechazo motivo=alcance sub=coordinador jti=74fb1d2c329b alcance_pedido=chaos:pool alcance_token=chaos:telemetria origen=127.0.0.1 trace_id=id-r1-alcance
+identidad rechazo motivo=vencido sub=coordinador jti=1fe19b618f8d alcance_pedido=chaos:telemetria alcance_token=chaos:telemetria origen=127.0.0.1 trace_id=id-r1-vencido
+identidad ok sub=defensor jti=33983098de8f alcance=identidad:revocar origen=127.0.0.1 trace_id=id-r1-contencion
+contencion identidad jti=74fb1d2c329b revocado trace_id=id-r1-contencion
+identidad rechazo motivo=revocado sub=coordinador jti=74fb1d2c329b alcance_pedido=chaos:telemetria alcance_token=chaos:telemetria origen=127.0.0.1 trace_id=id-r1-reuso
+identidad ok sub=defensor jti=d12742dfc504 alcance=chaos:revertir origen=127.0.0.1 trace_id=id-r1-reversion
+apagado manual
+identidad ok sub=defensor jti=34e3d75a351a alcance=chaos:leer origen=127.0.0.1 trace_id=-
+identidad ok sub=defensor jti=d12742dfc504 alcance=chaos:revertir origen=127.0.0.1 trace_id=id-r1-cierre
+apagado manual

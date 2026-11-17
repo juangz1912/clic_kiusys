@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.2.0 — 2026-11-17
+
+- Experimento 1 de identidad: credencial efímera del coordinador con alcance, origen y revocación detrás de `IDENTIDAD_ESTRICTA`
+- Ronda 0: 3 de 3 usos adversos aceptados y sin detección. Ronda 1: 0 de 3 aceptados, MTTD 0,25 s, MTTC 0,02 s y 0 falsos positivos
+- Regla `uso-credencial-no-previsto` con caso positivo y negativo, e informe en `chaos/security/informe-identidad.md`
+- `app/services/sli.py` ya no falla en Windows por el módulo `resource`
+- Informe del experimento 1 con tendencias del sector (Gartner 2027, CA/B Forum SC-081v3) y versión PDF
+
 ## v5.1.1 — 2026-11-16
 
 - Las dos rondas del pool quedaron medidas con k6 0.56.0, el mismo perfil en ambas

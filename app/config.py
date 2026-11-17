@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     app_version: str = "v2"
     app_track: str = "stable"
     chaos_token: str = "caos-local"
+    # Experimento 1: en falso el plano de control acepta el token estático (ronda 0).
+    identidad_estricta: bool = False
+    identidad_secreto: str = "cambiar-en-cada-despliegue"
+    identidad_audiencia: str = "clic-kiusys-control"
+    identidad_ttl_s: int = 60
+    identidad_origenes: str = "127.0.0.1"
     admission_enabled: bool = False
     admission_max_inflight: int = 2
     bulkhead_enabled: bool = False

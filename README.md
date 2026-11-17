@@ -291,7 +291,7 @@ python3 chaos/gate.py
 
 ## Defensa en profundidad
 
-El informe de controles es otro archivo, `chaos/security/informe-game-day.md`. No usa el p99. El experimento de este integrante es el 3: telemetría y dato. Los experimentos 1, 2 y 4 no se rellenan desde aquí.
+El informe de controles es otro archivo, `chaos/security/informe-game-day.md`. No usa el p99. El experimento de este integrante es el 3: telemetría y dato. El experimento 1 (identidad de máquinas, Daniel Morales) está en la sección siguiente. Los experimentos 2 y 4 no se rellenan desde aquí.
 
 ```mermaid
 flowchart LR
@@ -311,10 +311,40 @@ La frontera de esta capa es el proceso. No incluye la red de AWS ni la de GCP. L
 | Bitácora de solo anexo | 3, intento de truncar | ISO 27001 A.8.15, ATT&CK T1070 |
 | Señuelo | 3, ruta que el flujo no llama | D3-DO |
 | Dato que no es una orden | 3, inyección en `aeronave` | OWASP LLM01, ATLAS AML.T0051 |
+| Credencial efímera del coordinador (60 s, `aud`, `jti`) | 1, token robado y reusado | ATT&CK T1550.001, D3-CRO, ISO 27001 A.5.17, NIST IA-5 |
+| Alcance por acción y lista de orígenes | 1, uso desde 127.0.0.2 y con alcance de pool | D3-AZET, D3-ANET, ISO 27001 A.8.2 y A.8.5, NIST AC-6, mínimo privilegio y verificación continua de 800-207 |
+| Revocación por `jti` | 1, contención sin reiniciar | D3-CR |
+| Regla `uso-credencial-no-previsto` | 1, caso positivo y negativo | ISO 27001 A.8.16, NIST AU-6 |
 
 ```bash
 python3 chaos/security/run_game_day.py
 ```
+
+### Experimento 1: identidad de máquinas
+
+Responsable: Daniel Morales. Copia autocontenida para el docente: https://github.com/CodeNomad-01/defensa-caos-identidad-exp1. Informe en PDF: [chaos/security/informe-identidad.pdf](chaos/security/informe-identidad.pdf).
+
+La credencial del coordinador sobre el plano de control `/internal/*`. En la ronda 0 (`IDENTIDAD_ESTRICTA=false`) el token estático se acepta desde otro origen, con otro alcance y sin vencer, y no deja rastro de quién lo usó. En la ronda 1 la credencial es un JWT de 60 s con alcance, origen y revocación, y cada uso queda en la bitácora con trace id. Informe: [chaos/security/informe-identidad.md](chaos/security/informe-identidad.md).
+
+```mermaid
+flowchart LR
+  Coord[Coordinador 127.0.0.1] -- JWT alcance chaos:leer --> Plano["/internal/*"]
+  Robo[Credencial robada 127.0.0.2] -. inyeccion .-> Plano
+  Plano --> Politica{aud, exp, alcance, origen, jti revocado}
+  Politica -- ok o rechazo con trace --> Bitacora[Bitacora de solo anexo]
+  Bitacora --> Regla[Regla uso-credencial-no-previsto]
+  Regla --> Revocar[POST /internal/identidad/revocar]
+```
+
+La frontera de confianza es el socket de la API: el origen se toma del socket (`--no-proxy-headers`) y no de `X-Forwarded-For`. La telemetría de esta capa se recoge en las líneas `identidad ok` e `identidad rechazo` de `chaos/bitacora/eventos.log`.
+
+```bash
+python -m pytest tests/test_identidad.py -q       # 12 pruebas, incluidos los casos positivo y negativo de la regla
+python chaos/security/run_identidad.py            # dos rondas, escribe chaos/security/results/identidad.json
+python chaos/security/run_identidad.py --pausas   # demo paso a paso, tambien reescribe el JSON
+```
+
+Parada: Ctrl+C, o automatica si el health deja de responder antes de un uso adverso. Reversion: el `finally` manda `POST /internal/chaos {"tipo":"off"}`, apaga el proceso y verifica telemetria en `true` y pool inactivo. Cualquier corrida de las dos rondas reescribe `chaos/security/results/identidad.json` y anexa a la bitacora; la evidencia del informe es la del 17 de noviembre, se recupera con `git checkout -- chaos/security/results/identidad.json chaos/bitacora/eventos.log`.
 
 ## Despliegue OKE (Seguimiento #2)
 

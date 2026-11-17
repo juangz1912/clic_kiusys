@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "experimento": 1,
+  "title": "Credencial del coordinador usada desde otro origen, con otro alcance y fuera de su ventana",
+  "capa": "identidad de maquinas",
+  "responsable": "Daniel",
+  "tecnica": "ATT&CK T1550.001 Application Access Token, T1078.004 Cloud Accounts",
+  "parada": "Ctrl+C en run_identidad.py, o si el health deja de responder antes de un uso adverso. El finally manda POST /internal/chaos tipo off y apaga el proceso.",
+  "description": "Estado estable: el coordinador lee /internal/chaos desde 127.0.0.1 con su credencial y la regla no dispara. Hipotesis: dado el control de credencial tal como esta, cuando la credencial del coordinador se use desde un origen no previsto, con un alcance que no le toca o fuera de su ventana de vida, esperamos la alerta de la regla uso-credencial-no-previsto en T1 <= 2 s y la contencion (credencial revocada y reuso rechazado) en T2 <= 10 s. Metodo, igual en las dos rondas: tres usos de la credencial robada; desde 127.0.0.2 para pausar la telemetria, desde 127.0.0.1 para activar el pool, y una credencial vieja. Radio: solo el plano de control /internal/* de un proceso local en el puerto 8015, base SQLite desechable, sin OCI, AWS ni GCP. Datos sinteticos. Reversion: POST /internal/chaos tipo off, verificar telemetria true y pool inactivo, apagar el proceso.",
+  "rondas": {
+    "0": {"IDENTIDAD_ESTRICTA": "false", "control": "token estatico CHAOS_TOKEN, sin vencimiento, sin alcance, sin origen, sin bitacora de identidad"},
+    "1": {"IDENTIDAD_ESTRICTA": "true", "control": "JWT HS256 de 60 s con aud, alcance y jti, lista de origenes, revocacion por jti, cada uso en la bitacora con trace id"}
+  },
+  "method": ["python", "chaos/security/run_identidad.py"],
+  "demo": ["python", "chaos/security/run_identidad.py", "--pausas"],
+  "rollback": "automatico en el finally; manual: POST /internal/chaos {\"tipo\": \"off\"} con una credencial de alcance chaos:revertir",
+  "evidencia": ["chaos/security/results/identidad.json", "chaos/bitacora/eventos.log"]
+}

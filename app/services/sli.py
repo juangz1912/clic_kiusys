@@ -1,5 +1,9 @@
-import resource
 import time
+
+try:
+    import resource
+except ImportError:  # Windows no trae el módulo resource
+    resource = None
 from threading import Lock
 
 _lock = Lock()
@@ -41,6 +45,8 @@ def _percentil(samples: list[float], pct: float) -> float:
 
 def _cpu_mem() -> tuple[float, float]:
     global _cpu_prev
+    if resource is None:
+        return 0.0, 0.0
     uso = resource.getrusage(resource.RUSAGE_SELF)
     ahora = time.monotonic()
     cpu = uso.ru_utime + uso.ru_stime

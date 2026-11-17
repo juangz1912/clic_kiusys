@@ -1,0 +1,190 @@
+{
+  "experimento": 1,
+  "capa": "identidad de maquinas",
+  "inicio": "2026-11-17T17:18:01.986Z",
+  "fin": "2026-11-17T17:18:25.802Z",
+  "t1_s": 2,
+  "t2_s": 10,
+  "metrica_objetivo": "MTTD",
+  "rondas": [
+    {
+      "ronda": 0,
+      "control": "token estatico",
+      "falsos_positivos": 0,
+      "usos_legitimos": 10,
+      "cobertura_telemetria_identidad": 0.0,
+      "usos_adversos_aceptados": 3,
+      "mttd_s": {
+        "origen": null,
+        "alcance": null,
+        "vencido": null
+      },
+      "mttd_peor_s": null,
+      "mttc_s": null,
+      "cobertura_deteccion": "0/3",
+      "estado_inicial_verificado": true
+    },
+    {
+      "ronda": 1,
+      "control": "credencial efimera + politica",
+      "falsos_positivos": 0,
+      "usos_legitimos": 10,
+      "cobertura_telemetria_identidad": 1.0,
+      "usos_adversos_aceptados": 0,
+      "mttd_s": {
+        "origen": 0.25,
+        "alcance": 0.24,
+        "vencido": 0.23
+      },
+      "mttd_peor_s": 0.25,
+      "mttc_s": 0.02,
+      "cobertura_deteccion": "3/3",
+      "estado_inicial_verificado": true
+    }
+  ],
+  "cronologia": [
+    {
+      "t": "2026-11-17T17:18:03.585Z",
+      "ronda": 0,
+      "hecho": "estado estable",
+      "trace_id": "id-r0-estable",
+      "status": 200,
+      "telemetria": true
+    },
+    {
+      "t": "2026-11-17T17:18:08.676Z",
+      "ronda": 0,
+      "hecho": "caso negativo",
+      "legitimos_200": 10,
+      "falsos_positivos": 0,
+      "cobertura_telemetria": 0.0
+    },
+    {
+      "t": "2026-11-17T17:18:08.762Z",
+      "ronda": 0,
+      "hecho": "uso desde otro origen 127.0.0.2",
+      "status": 200,
+      "trace_id": "id-r0-origen"
+    },
+    {
+      "t": "2026-11-17T17:18:08.779Z",
+      "ronda": 0,
+      "hecho": "uso con alcance no previsto (pool)",
+      "status": 200,
+      "trace_id": "id-r0-alcance"
+    },
+    {
+      "t": "2026-11-17T17:18:08.821Z",
+      "ronda": 0,
+      "hecho": "uso fuera de la ventana de vida",
+      "status": 200,
+      "trace_id": "id-r0-vencido"
+    },
+    {
+      "t": "2026-11-17T17:18:14.748Z",
+      "ronda": 0,
+      "hecho": "la regla no disparo: no hay eventos de identidad en la bitacora"
+    },
+    {
+      "t": "2026-11-17T17:18:18.740Z",
+      "ronda": 0,
+      "hecho": "contencion",
+      "revocar_status": 404,
+      "reuso_status": 200,
+      "contenida": false,
+      "mttc_s": null
+    },
+    {
+      "t": "2026-11-17T17:18:18.774Z",
+      "ronda": 0,
+      "hecho": "reversion verificada",
+      "telemetria": true,
+      "pool_activo": false,
+      "estado_inicial": true
+    },
+    {
+      "t": "2026-11-17T17:18:20.360Z",
+      "ronda": 1,
+      "hecho": "estado estable",
+      "trace_id": "id-r1-estable",
+      "status": 200,
+      "telemetria": true
+    },
+    {
+      "t": "2026-11-17T17:18:25.464Z",
+      "ronda": 1,
+      "hecho": "caso negativo",
+      "legitimos_200": 10,
+      "falsos_positivos": 0,
+      "cobertura_telemetria": 1.0
+    },
+    {
+      "t": "2026-11-17T17:18:25.527Z",
+      "ronda": 1,
+      "hecho": "uso desde otro origen 127.0.0.2",
+      "status": 403,
+      "trace_id": "id-r1-origen"
+    },
+    {
+      "t": "2026-11-17T17:18:25.534Z",
+      "ronda": 1,
+      "hecho": "uso con alcance no previsto (pool)",
+      "status": 403,
+      "trace_id": "id-r1-alcance"
+    },
+    {
+      "t": "2026-11-17T17:18:25.541Z",
+      "ronda": 1,
+      "hecho": "uso fuera de la ventana de vida",
+      "status": 401,
+      "trace_id": "id-r1-vencido"
+    },
+    {
+      "t": "2026-11-17T17:18:25.774Z",
+      "ronda": 1,
+      "hecho": "alerta: origen",
+      "trace_id": "id-r1-origen",
+      "origen": "127.0.0.2",
+      "jti": "74fb1d2c329b",
+      "severidad": "alta",
+      "mttd_s": 0.25
+    },
+    {
+      "t": "2026-11-17T17:18:25.774Z",
+      "ronda": 1,
+      "hecho": "alerta: alcance",
+      "trace_id": "id-r1-alcance",
+      "origen": "127.0.0.1",
+      "jti": "74fb1d2c329b",
+      "severidad": "alta",
+      "mttd_s": 0.24
+    },
+    {
+      "t": "2026-11-17T17:18:25.774Z",
+      "ronda": 1,
+      "hecho": "alerta: vencido",
+      "trace_id": "id-r1-vencido",
+      "origen": "127.0.0.1",
+      "jti": "1fe19b618f8d",
+      "severidad": "media",
+      "mttd_s": 0.23
+    },
+    {
+      "t": "2026-11-17T17:18:25.784Z",
+      "ronda": 1,
+      "hecho": "contencion",
+      "revocar_status": 200,
+      "reuso_status": 401,
+      "contenida": true,
+      "mttc_s": 0.02
+    },
+    {
+      "t": "2026-11-17T17:18:25.796Z",
+      "ronda": 1,
+      "hecho": "reversion verificada",
+      "telemetria": true,
+      "pool_activo": false,
+      "estado_inicial": true
+    }
+  ]
+}
