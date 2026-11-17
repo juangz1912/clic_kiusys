@@ -26,7 +26,7 @@ logging.getLogger("clic_kiusys").propagate = False
 
 from app.config import settings
 from app.telemetry import setup_telemetry
-from app.database import init_db
+from app.database import init_db, seed_demo
 from app.middleware.canary_fault import CanaryFaultMiddleware
 from app.middleware.chaos_pool import ChaosPoolMiddleware
 from app.middleware.metrics_v2 import V2MetricsMiddleware
@@ -44,6 +44,7 @@ from app.routes.v3 import router as router_v3
 async def lifespan(_: FastAPI):
     if settings.environment != "test":
         init_db()
+        seed_demo()
     yield
 
 

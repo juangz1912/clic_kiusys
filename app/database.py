@@ -19,6 +19,30 @@ def get_db():
         db.close()
 
 
+def seed_demo() -> None:
+    from datetime import date
+
+    from app.models.entities import Vuelo
+
+    db = SessionLocal()
+    try:
+        if db.query(Vuelo).first() is not None:
+            return
+        db.add(
+            Vuelo(
+                numero_vuelo="CA100",
+                origen="BOG",
+                destino="MDE",
+                fecha=date(2026, 11, 18),
+                aeronave="A320",
+                capacidad=120,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
 def init_db() -> None:
     from app import models  # noqa: F401
 
