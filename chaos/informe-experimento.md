@@ -1,13 +1,13 @@
 # Experimento: agotamiento del pool de la API de vuelos
 
-Juan José Giraldo. API de vuelos, integrante A. Medición del 16 de noviembre de 2026.
+Juan José Giraldo. API de vuelos, integrante A. Medición del 17 de noviembre de 2026 contra `https://clic-kiusys-vuelos.up.railway.app`.
 Los números salen de `chaos/results/ronda-0.json` y `chaos/results/ronda-1.json`.
 
 ## Estado estable
 
-Sin fallo y sin control de admisión, el perfil P de k6 0.56.0 (sube a 12 VU en 5 s, sostiene 20 s, baja en 5 s, timeout de 6 s) contra `GET /api/v2/entidades/vuelos/random` dio 14740 respuestas, todas 200. El p99 fue 56,8 ms y el p95 33,2 ms. El throughput fue 491,3 peticiones por segundo. No hubo 4xx ni 5xx.
+Sin fallo y sin control de admisión, el perfil P de k6 0.56.0 (sube a 12 VU en 5 s, sostiene 20 s, baja en 5 s, timeout de 6 s) contra `GET /api/v2/entidades/vuelos/random` en Railway dio 3090 respuestas, todas 200. El p99 fue 203,5 ms y el p95 147,6 ms. El throughput fue 103 peticiones por segundo. No hubo 4xx ni 5xx.
 
-Ese p99 de 56,8 ms es la línea base. El umbral de la hipótesis se fijó antes de inyectar el fallo: el p99 no puede pasar de 2000 ms. La métrica objetivo es solo esa. El throughput y la tasa de error se anotan para explicar el mecanismo, no para decidir.
+Ese p99 de 203,5 ms es la línea base. El viaje hasta Railway ya está en esa cifra. El umbral de la hipótesis se fijó antes de inyectar el fallo: el p99 no puede pasar de 2000 ms. La métrica objetivo es solo esa. El throughput y la tasa de error se anotan para explicar el mecanismo, no para decidir.
 
 ## Hipótesis
 
@@ -21,9 +21,9 @@ El radio es el proceso de la API de vuelos. La base solo presta la fila del vuel
 
 ## Ronda 0, sin protección
 
-Con el pool en 1 y una espera de hasta 4000 ms por un permiso, el perfil solo completó 80 peticiones. 45 fueron 200 y 35 fueron 503. El throughput bajó a 2,5 por segundo. El p99 fue 4667,5 ms y el p95 4532,8 ms. k6 salió con código 99, porque el umbral de 2000 ms no se cumplió.
+Con el pool en 1 y una espera de hasta 4000 ms por un permiso, el perfil solo completó 80 peticiones. 46 fueron 200 y 34 fueron 503. El throughput bajó a 2,45 por segundo. El p99 fue 4683,7 ms y el p95 4506,7 ms. k6 salió con código 99, porque el umbral de 2000 ms no se cumplió.
 
-La hipótesis se refuta: 4667 es más del doble del umbral. El mecanismo no es un 500 genérico. Las 12 VU hacen cola detrás de un solo permiso que se retiene 700 ms. Quien no alcanza permiso en 4 segundos recibe 503. El coordinador, con timeout de 2 segundos, vería la mayoría como timeout. Después de `DELETE /internal/chaos` la misma carga volvió a 15397 respuestas 200, p99 55,1 ms.
+La hipótesis se refuta: 4683 es más del doble del umbral. El mecanismo no es un 500 genérico. Las 12 VU hacen cola detrás de un solo permiso que se retiene 700 ms. Quien no alcanza permiso en 4 segundos recibe 503. El coordinador, con timeout de 2 segundos, vería la mayoría como timeout. Después de `DELETE /internal/chaos` la misma carga volvió a 3243 respuestas 200, p99 170,8 ms.
 
 ## Mejora
 
@@ -36,25 +36,25 @@ No se agregaron reintentos. Reintentar contra un pool de 1 alarga la cola.
 
 ## Ronda 1, con la mejora
 
-El mismo perfil, el mismo pool de 1, la misma retención de 700 ms, el mismo k6. El p99 fue 40,7 ms. La hipótesis, sobre esa única métrica, se sostiene.
+El mismo perfil, el mismo pool de 1, la misma retención de 700 ms, el mismo k6, contra Railway. La ronda se fijó con `POST /internal/chaos` `tipo=ronda`. El p99 fue 1048,7 ms. La hipótesis, sobre esa única métrica, se sostiene.
 
-De 26046 peticiones, 25962 fueron 429, 43 fueron 200 y 41 fueron 503 del pool. No hubo peticiones sin código HTTP. El 503 del pool pasó de 35 de 80 (44 %) a 41 de 26046 (0,16 %).
+De 2556 peticiones, 2472 fueron 429, 43 fueron 200 y 41 fueron 503 del pool. El 503 del pool pasó de 34 de 80 (42 %) a 41 de 2556 (1,6 %).
 
 ## Comparación
 
 | | Línea base | Ronda 0 | Ronda 1 |
 | --- | --- | --- | --- |
-| p99 | 56,8 ms | 4667,5 ms | 40,7 ms |
-| Throughput | 491,3 /s | 2,5 /s | 845,5 /s |
-| 503 de pool | 0 | 35 | 41 |
+| p99 | 203,5 ms | 4683,7 ms | 1048,7 ms |
+| Throughput | 103 /s | 2,45 /s | 83,6 /s |
+| 503 de pool | 0 | 34 | 41 |
 | Veredicto | — | se refuta | se sostiene |
 
-El p99 baja de 4667,5 ms a 40,7 ms: un 99 % menos. El sistema deja de quedarse callado y contesta, aunque sea para decir que no hay cupo.
+El p99 baja de 4683,7 ms a 1048,7 ms. Sigue bajo el umbral de 2000 ms. El sistema deja de quedarse callado y contesta, aunque sea para decir que no hay cupo.
 
 ## Hallazgos y backlog
 
-k6 ya es el instrumento de las dos rondas. El próximo paso es repetir el mismo perfil sobre la VM de OCI cuando haya capacidad. Hoy la URL pública vieja `http://157-137-193-66.sslip.io` no sirve esta ruta. La corrida fue en local.
+Esta corrida ya pegó a Railway, no a la máquina local. El host viejo `http://157-137-193-66.sslip.io` sigue sin ser esta API.
 
 Queda pendiente subir estas series a Grafana Cloud. El tablero versionado está en `observability/grafana/dashboard-caos-rondas.json`. La comparación que sí se midió es la tabla de arriba y los dos JSON.
 
-La puerta `chaos/gate.py` lee el p99 de la ronda 1 y falla si pasa de 2000 ms. En esta corrida pasó: 40,7. El workflow `chaos-gate.yml` solo corre con la ventana autorizada y siempre intenta revertir.
+La puerta `chaos/gate.py` lee el p99 de la ronda 1 y falla si pasa de 2000 ms. En esta corrida pasó: 1048,7. El workflow `chaos-gate.yml` solo corre con la ventana autorizada y siempre intenta revertir.
