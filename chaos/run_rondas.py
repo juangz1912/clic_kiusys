@@ -14,7 +14,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = "http://127.0.0.1:8011"
+BASE = os.environ.get("BASE_URL", "https://clic-kiusys-vuelos.up.railway.app")
 TOKEN = "caos-local"
 PERFIL = {
     "hilos": 12,
@@ -110,9 +110,25 @@ def cargar(etiqueta: str) -> dict:
     }
 
 
-def esperar_health(proc: subprocess.Popen) -> None:
-    for _ in range(40):
-        if proc.poll() is not None:
+def es_local() -> bool:
+    return "127.0.0.1" in BASE or "localhost" in BASE
+
+
+def fijar_ronda(ronda: str) -> None:
+    codigo, cuerpo = pedir(
+        BASE + "/internal/chaos",
+        method="POST",
+        token=True,
+        body={"tipo": "ronda", "ronda": ronda},
+        timeout=20,
+    )
+    if codigo != 200 or cuerpo.get("ronda") != ronda:
+        raise SystemExit(f"no quedo la ronda {ronda}: {codigo} {cuerpo}")
+
+
+def esperar_health(proc: subprocess.Popen | None) -> None:
+    for _ in range(60):
+        if proc is not None and proc.poll() is not None:
             raise SystemExit("el API no arranco")
         codigo, _ = pedir(BASE + "/api/v2/health", timeout=2)
         if codigo == 200:
@@ -172,9 +188,12 @@ def revertir() -> None:
 
 
 def medir(nombre: str, admision: bool, wait_ms: int) -> dict:
-    proc = arrancar(admision)
+    local = es_local()
+    proc = arrancar(admision) if local else None
     try:
         esperar_health(proc)
+        if not local:
+            fijar_ronda("1" if admision else "0")
         sembrar()
         base = cargar(f"{nombre}-base")
         inyectar(wait_ms)
@@ -182,7 +201,11 @@ def medir(nombre: str, admision: bool, wait_ms: int) -> dict:
         revertir()
         despues = cargar(f"{nombre}-despues")
     finally:
-        matar(proc)
+        if local:
+            matar(proc)
+        else:
+            fijar_ronda("0")
+            revertir()
     resultado = {
         "ronda": nombre,
         "perfil": PERFIL,

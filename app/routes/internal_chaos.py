@@ -4,13 +4,14 @@ from pydantic import BaseModel, Field
 from app.config import settings
 from app.services import identidad
 from app.services.bitacora import anexar
-from app.services.chaos_state import activar_pool, apagar, estado, pausar_telemetria
+from app.services.chaos_state import activar_pool, apagar, estado, fijar_ronda, pausar_telemetria
 
 router = APIRouter()
 
 
 class ChaosBody(BaseModel):
-    tipo: str = Field(pattern="pool|telemetria|off")
+    tipo: str = Field(pattern="pool|telemetria|off|ronda")
+    ronda: str = "0"
     tamano: int = 1
     hold_ms: int = 700
     wait_ms: int = 4000
@@ -22,7 +23,12 @@ class RevocarBody(BaseModel):
     jti: str
 
 
-_ALCANCE_POR_TIPO = {"off": "chaos:revertir", "telemetria": "chaos:telemetria", "pool": "chaos:pool"}
+_ALCANCE_POR_TIPO = {
+    "off": "chaos:revertir",
+    "telemetria": "chaos:telemetria",
+    "pool": "chaos:pool",
+    "ronda": "chaos:revertir",
+}
 
 
 def _exigir(token: str | None, request: Request, alcance: str) -> None:
@@ -81,6 +87,9 @@ def inyectar(body: ChaosBody, request: Request, x_chaos_token: str | None = Head
     if body.tipo == "telemetria":
         anexar(f"telemetria pausada={body.pausada}")
         return pausar_telemetria(body.pausada)
+    if body.tipo == "ronda":
+        anexar(f"ronda={body.ronda}")
+        return fijar_ronda(body.ronda)
     anexar(f"pool tamano={body.tamano} hold_ms={body.hold_ms} ttl={body.ttl_seconds}")
     return activar_pool(body.tamano, body.hold_ms, body.ttl_seconds, body.wait_ms)
 

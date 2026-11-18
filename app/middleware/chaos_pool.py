@@ -8,6 +8,7 @@ from starlette.responses import JSONResponse, Response
 from app.config import settings
 from app.services.chaos_state import (
     adquirir,
+    admision_activa,
     entrar_admision,
     latido,
     salir_admision,
@@ -26,7 +27,7 @@ class ChaosPoolMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         en_admision = False
-        if settings.admission_enabled:
+        if admision_activa():
             if not entrar_admision(settings.admission_max_inflight):
                 sumar_rechazo_admision()
                 return JSONResponse(

@@ -2,6 +2,11 @@ from app.services.bitacora import RUTA, truncar
 from app.services.chaos_state import activar_pool, apagar, estado
 
 
+def test_la_respuesta_trae_la_ronda(client):
+    respuesta = client.get("/api/v2/health")
+    assert respuesta.headers["x-ronda"] == "0"
+
+
 def test_el_pool_arranca_apagado():
     apagar()
     assert estado()["activo"] is False

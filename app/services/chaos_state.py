@@ -22,6 +22,7 @@ _rejected = 0
 _waited = 0
 _inflight = 0
 _inflight_lock = threading.Lock()
+_ronda: str | None = None
 
 
 def _rebuild(size: int) -> None:
@@ -39,6 +40,7 @@ def estado() -> dict:
             "hold_ms": _hold_ms if activo else 0,
             "segundos_restantes": max(0, int(_deadline - time.time())) if activo and _deadline else 0,
             "telemetria": _telemetry,
+            "ronda": _ronda if _ronda in ("0", "1") else None,
             "rechazadas": _rejected,
             "en_espera": _waited,
             "latido": _last_beat,
@@ -65,6 +67,31 @@ def apagar() -> dict:
         _telemetry = True
         _rebuild(32)
     return estado()
+
+
+def fijar_ronda(ronda: str) -> dict:
+    global _ronda
+    with _lock:
+        _ronda = "1" if ronda == "1" else "0"
+    return {"ronda": ronda_efectiva()}
+
+
+def ronda_efectiva() -> str:
+    if _ronda in ("0", "1"):
+        return _ronda
+    from app.config import settings
+
+    return "1" if settings.chaos_ronda == "1" else "0"
+
+
+def admision_activa() -> bool:
+    from app.config import settings
+
+    if _ronda == "1":
+        return True
+    if _ronda == "0":
+        return False
+    return settings.admission_enabled
 
 
 def pausar_telemetria(pausada: bool) -> dict:

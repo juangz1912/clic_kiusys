@@ -59,6 +59,8 @@ flowchart LR
 
 URL pública de la API A: https://clic-kiusys-vuelos.up.railway.app
 
+Esa URL corre en Railway, no en OCI. `GET /api/v2/health` devuelve `cloud_provider: railway`. Cada respuesta lleva `X-Ronda`: `0` sin admisión y `1` con admisión. El workflow `railway-ronda.yml` cambia esa ronda.
+
 El host viejo `http://157-137-193-66.sslip.io` ya no es esta API. Responde 308 a HTTPS y después `404 {"error":"no encontrado"}` desde un puente Python. El enlace que hay que usar, en https y sin redirección, es el de arriba. Health y vuelo random responden 200.
 
 ### Servicios adicionales (OCI)
@@ -397,7 +399,8 @@ Plantilla para el equipo: [docs/EQUIPO_INTEGRACION.md](docs/EQUIPO_INTEGRACION.m
 ## Pipelines
 
 - `canary.yml` — manual: fija el porcentaje del canary (0, 10, 50, 100) y puede reinstalar los dos contenedores
-- `chaos-gate.yml` — manual, solo con la ventana autorizada: corre las dos rondas, revierte y falla si el p99 de la ronda 1 pasa de 2000 ms
+- `chaos-gate.yml` — manual, solo con la ventana autorizada: corre las dos rondas en local, revierte y falla si el p99 de la ronda 1 pasa de 2000 ms
+- `railway-ronda.yml` — manual: deja la API pública en ronda 0 o 1. Hace falta el secret `RAILWAY_TOKEN`
 - `terraform-oci.yml` — manual: `terraform apply` e instala el API en la VM
 - `terraform-destruir.yml` — manual: `terraform destroy`
 - `deploy-oke.yml` — manual. El clúster del seguimiento 2 ya no existe

@@ -1,13 +1,43 @@
 {
-  "title": "Ausencia de latido de la API de vuelos",
   "uid": "clic-ausencia-latido",
-  "condition": "A",
+  "title": "API A - ausencia de latido",
+  "ruleGroup": "clic-s2",
+  "condition": "C",
+  "for": "30s",
   "noDataState": "Alerting",
   "execErrState": "Error",
-  "for": "30s",
+  "labels": { "severity": "critical", "equipo": "multicloud-s2", "capa": "deteccion" },
   "annotations": {
-    "summary": "La serie del latido dejo de llegar. No es una alerta de errores 5xx."
+    "summary": "clic-kiusys-api dejo de enviar la serie del latido",
+    "description": "No es una alerta de errores 5xx. Si no hay datos, la telemetria esta ciega."
   },
-  "labels": {"service": "clic-kiusys-api", "capa": "deteccion"},
-  "notas": "Versionada para Grafana Cloud. En esta entrega la regla que si se ejecuto es chaos/security/detectar_latido.py, porque no hay VM ni token de Grafana en el repo."
+  "data": [
+    {
+      "refId": "A",
+      "datasourceUid": "grafanacloud-prom",
+      "relativeTimeRange": { "from": 300, "to": 0 },
+      "model": {
+        "refId": "A",
+        "expr": "sum(increase(http_server_requests_total{service_name=\"clic-kiusys-api\"}[2m]))",
+        "instant": true,
+        "intervalMs": 1000,
+        "maxDataPoints": 43200
+      }
+    },
+    {
+      "refId": "B",
+      "datasourceUid": "__expr__",
+      "model": { "refId": "B", "type": "reduce", "expression": "A", "reducer": "last" }
+    },
+    {
+      "refId": "C",
+      "datasourceUid": "__expr__",
+      "model": {
+        "refId": "C",
+        "type": "threshold",
+        "expression": "B",
+        "conditions": [ { "evaluator": { "type": "lt", "params": [0] } } ]
+      }
+    }
+  ]
 }

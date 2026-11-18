@@ -27,6 +27,8 @@ jobs:
           mv /tmp/k6-v0.56.0-linux-amd64/k6 "$HOME/.local/bin/k6"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Rondas y reversion
+        env:
+          BASE_URL: http://127.0.0.1:8011
         run: python3 chaos/run_rondas.py
       - name: Reversion de cierre
         if: always()

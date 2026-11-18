@@ -1,0 +1,41 @@
+name: Railway ronda
+
+on:
+  workflow_dispatch:
+    inputs:
+      ronda:
+        description: "0 sin proteccion, 1 con admision"
+        required: true
+        type: choice
+        options:
+          - "0"
+          - "1"
+
+jobs:
+  cambiar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fijar la ronda en Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RONDA: ${{ inputs.ronda }}
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "Falta el secret RAILWAY_TOKEN"
+            exit 1
+          fi
+          if [ "$RONDA" = "1" ]; then
+            ADMISION=true
+          else
+            ADMISION=false
+          fi
+          poner() {
+            curl -fsS https://backboard.railway.com/graphql/v2 \
+              -H "Authorization: Bearer $RAILWAY_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"query\":\"mutation(\$input: VariableUpsertInput!) { variableUpsert(input: \$input) }\",\"variables\":{\"input\":{\"projectId\":\"16fc818c-7956-44a5-aab0-e788fe332cb6\",\"environmentId\":\"6c414a44-0948-449a-a3d0-4deb40784a21\",\"serviceId\":\"c0633e0b-f781-47b7-8ff8-94f3766a8d37\",\"name\":\"$1\",\"value\":\"$2\"}}}"
+            echo
+          }
+          poner CHAOS_RONDA "$RONDA"
+          poner ADMISSION_ENABLED "$ADMISION"
+          echo "ronda $RONDA en camino. El health debe decir cloud_provider railway y la cabecera X-Ronda=$RONDA"
